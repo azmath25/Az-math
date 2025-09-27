@@ -1,0 +1,2 @@
+async function loadMathBackground() { const res = await fetch("data/background-math.json"); const equations = await res.json(); const container = document.getElementById("math-background"); equations.forEach((eq, i) => { const div = document.createElement("div"); div.className = "math-equation"; div.style.left = Math.random() * 90 + "vw"; div.style.animationDelay = (i * 5) + "s"; div.innerHTML = `\\(${eq}\\)`; container.appendChild(div); }); MathJax.typesetPromise(); }
+document.addEventListener("DOMContentLoaded", loadMathBackground);

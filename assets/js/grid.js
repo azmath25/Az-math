@@ -1,0 +1,2 @@
+async function loadGrid() { const res = await fetch("problems.json"); const problems = await res.json(); const container = document.getElementById("grid-container"); problems.forEach(p => { const div = document.createElement("div"); div.style.width = "100px"; div.style.height = "100px"; div.style.background = p.color; div.style.display = "inline-block"; div.style.margin = "10px"; div.style.cursor = "pointer"; div.onclick = () => location.href = `problem${p.id}.html`; container.appendChild(div); }); }
+document.addEventListener("DOMContentLoaded", loadGrid);

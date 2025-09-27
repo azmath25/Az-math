@@ -1,0 +1,4 @@
+[
+  { "id": 1, "topic": "algebra", "color": "#FF6B6B", "statement": "Solve x+2=5", "date": "2025-01-01" },
+  { "id": 2, "topic": "geometry", "color": "#4ECDC4", "statement": "Find the area of a circle of radius 3", "date": "2025-01-05" }
+]

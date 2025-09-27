@@ -1,0 +1,6 @@
+[
+  "\\int_0^\\infty e^{-x^2} dx = \\frac{\\sqrt{\\pi}}{2}",
+  "a^2 + b^2 = c^2",
+  "e^{i\\pi} + 1 = 0",
+  "\\nabla \\cdot \\vec{E} = \\frac{\\rho}{\\epsilon_0}"
+]
