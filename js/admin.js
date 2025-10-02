@@ -1,11 +1,16 @@
 // js/admin.js
-// Admin Problems CRUD (localStorage fallback). Preserves createdAt, sets updatedAt when editing.
-// Includes import/export and modal editor.
+// Admin panel for Problems: list, search, add, edit, delete, import/export.
+// Uses Firestore collection "problems" and "meta"/"counters" doc for numeric id assignment.
+// MathJax is used for rendering math in statements/solutions.
 
-const STORE_KEY = "azmath_problems_v1";
+import { db } from "./firebase.js";
+import {
+  collection, query, orderBy, getDocs, addDoc, doc, getDoc,
+  runTransaction, updateDoc, deleteDoc, serverTimestamp, setDoc
+} from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-  // tabs
+  // Tabs
   const tabs = document.querySelectorAll(".tabs button");
   const sections = document.querySelectorAll(".section");
   tabs.forEach(tab => tab.addEventListener("click", () => {
@@ -15,8 +20,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById(`${tab.dataset.tab}-section`).classList.add("active");
   }));
 
-  // elements
-  const problemsList = document.getElementById("problems-list");
+  // Elements
+  const problemsListEl = document.getElementById("problems-list");
   const addBtn = document.getElementById("add-problem-btn");
   const searchBtn = document.getElementById("search-problem-btn");
   const searchInput = document.getElementById("problem-search");
@@ -24,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const importBtn = document.getElementById("import-problems-btn");
   const importFileInput = document.getElementById("import-problems-file");
 
-  // modal
+  // Modal/editor elements
   const modal = document.getElementById("editor-modal");
   const form = document.getElementById("editor-form");
   const titleField = document.getElementById("problem-title");
@@ -36,80 +41,156 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeEditorBtn = document.getElementById("close-editor");
   const deleteBtn = document.getElementById("delete-problem-btn");
 
-  let problems = loadProblemsFromStore();
-  let editingId = null;
+  // In-memory list
+  let problems = []; // objects: { _docId, id (numeric), title, statement, ... }
+  let filtered = [];
 
-  // ensure createdAt exists
-  problems.forEach(p => { if (!p.createdAt) p.createdAt = new Date().toISOString(); });
-  problems.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
-  renderProblems(problems);
+  // Initial load
+  (async () => {
+    await loadProblems();
+    sortProblems();
+    filtered = problems.slice();
+    renderProblems(filtered);
+  })();
 
-  // search
+  // Event handlers
   searchBtn.addEventListener("click", () => {
-    const q = searchInput.value.trim().toLowerCase();
-    const res = problems.filter(p => {
+    const q = (searchInput.value || "").trim().toLowerCase();
+    if (!q) { filtered = problems.slice(); renderProblems(filtered); return; }
+    filtered = problems.filter(p => {
       return (p.title||"").toLowerCase().includes(q)
         || (p.statement||"").toLowerCase().includes(q)
         || (p.tags||[]).join(" ").toLowerCase().includes(q);
     });
-    renderProblems(res);
+    renderProblems(filtered);
   });
-
   searchInput.addEventListener("keydown", (e) => { if (e.key === "Enter") searchBtn.click(); });
 
-  // add
   addBtn.addEventListener("click", () => openEditor(null));
 
-  // export / import
-  exportBtn.addEventListener("click", () => {
-    const data = JSON.stringify(problems, null, 2);
-    const blob = new Blob([data], {type:"application/json"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `azmath_problems_${(new Date()).toISOString().slice(0,10)}.json`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
+  exportBtn.addEventListener("click", async () => {
+    // export all problems as JSON (with fields)
+    try {
+      const snap = await getDocs(query(collection(db, "problems"), orderBy("createdAt", "desc")));
+      const arr = snap.docs.map(d => ({ _docId: d.id, ...d.data() }));
+      const blob = new Blob([JSON.stringify(arr, null, 2)], { type:"application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `azmath_problems_export_${(new Date()).toISOString().slice(0,10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert("Export failed: " + err.message);
+    }
   });
 
   importBtn.addEventListener("click", () => importFileInput.click());
-  importFileInput.addEventListener("change", (e) => {
+  importFileInput.addEventListener("change", async (e) => {
     const f = e.target.files[0];
     if (!f) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      try {
-        const imported = JSON.parse(ev.target.result);
-        if (!Array.isArray(imported)) throw new Error("Expected an array of problems");
-        imported.forEach(p => { if (!p.id) p.id = genId(); if (!p.createdAt) p.createdAt = new Date().toISOString(); });
-        // Merge: naive replace; you can modify to merge by id
-        problems = imported.concat(problems.filter(p => !imported.find(i => i.id === p.id)));
-        saveProblemsToStore(problems);
-        problems.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
-        renderProblems(problems);
-        alert("Imported " + imported.length + " problems.");
-      } catch (err) {
-        alert("Import failed: " + err.message);
+    try {
+      const txt = await f.text();
+      const imported = JSON.parse(txt);
+      if (!Array.isArray(imported)) throw new Error("Expected array of problem objects");
+      // Import each problem: assign new numeric id via transaction, and create doc with serverTimestamp
+      for (const p of imported) {
+        // build data to save (we don't trust incoming ids)
+        const data = {
+          title: p.title || "",
+          statement: p.statement || "",
+          solution: p.solution || "",
+          tags: Array.isArray(p.tags) ? p.tags : (p.tags ? String(p.tags).split(",").map(s=>s.trim()) : []),
+          images: Array.isArray(p.images) ? p.images : (p.images ? String(p.images).split("\n").map(s=>s.trim()).filter(Boolean) : []),
+          createdAt: serverTimestamp()
+        };
+        const newNumericId = await getNextProblemNumericId();
+        data.id = newNumericId;
+        await addDoc(collection(db, "problems"), data);
       }
-    };
-    reader.readAsText(f);
-    e.target.value = "";
+      alert("Import finished. Refreshing list...");
+      await loadProblems();
+      sortProblems();
+      filtered = problems.slice();
+      renderProblems(filtered);
+    } catch (err) {
+      alert("Import failed: " + err.message);
+    } finally {
+      e.target.value = "";
+    }
   });
 
-  // editor open
-  function openEditor(id) {
-    editingId = id;
-    if (id) {
-      const p = problems.find(x => x.id === id);
+  // Editor logic
+  closeEditorBtn.addEventListener("click", () => closeModal());
+  deleteBtn.addEventListener("click", async () => {
+    if (!editingDocId) return;
+    if (!confirm("Delete this problem?")) return;
+    try {
+      await deleteDoc(doc(db, "problems", editingDocId));
+      await loadProblems();
+      sortProblems();
+      filtered = problems.slice();
+      renderProblems(filtered);
+    } catch (err) {
+      alert("Delete failed: " + err.message);
+    } finally {
+      closeModal();
+    }
+  });
+
+  let editingDocId = null; // Firestore document id being edited (null means create)
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const title = titleField.value.trim();
+    const statement = statementField.value.trim();
+    const solution = solutionField.value.trim();
+    const tags = (tagsField.value || "").split(",").map(s => s.trim()).filter(Boolean);
+    const images = (imagesField.value || "").split("\n").map(s => s.trim()).filter(Boolean);
+
+    if (!title) { alert("Please provide a title."); return; }
+
+    try {
+      if (editingDocId) {
+        // Update existing doc (preserve existing numeric id field)
+        const ref = doc(db, "problems", editingDocId);
+        await updateDoc(ref, {
+          title, statement, solution, tags, images, updatedAt: serverTimestamp()
+        });
+      } else {
+        // Create: get numeric id from counters (transaction) and create doc with serverTimestamp
+        const numericId = await getNextProblemNumericId();
+        await addDoc(collection(db, "problems"), {
+          id: numericId,
+          title, statement, solution, tags, images,
+          createdAt: serverTimestamp()
+        });
+      }
+      // refresh
+      await loadProblems();
+      sortProblems();
+      filtered = problems.slice();
+      renderProblems(filtered);
+      closeModal();
+    } catch (err) {
+      alert("Save failed: " + err.message);
+    }
+  });
+
+  // open editor helper
+  function openEditor(docId) {
+    editingDocId = docId || null;
+    if (docId) {
+      const p = problems.find(x => x._docId === docId);
       if (!p) { alert("Problem not found"); return; }
       editorTitle.textContent = "Edit Problem";
       titleField.value = p.title || "";
-      tagsField.value = (p.tags||[]).join(", ");
+      tagsField.value = (p.tags || []).join(", ");
       statementField.value = p.statement || "";
       solutionField.value = p.solution || "";
-      imagesField.value = (p.images||[]).join("\n");
+      imagesField.value = (p.images || []).join("\n");
       deleteBtn.style.display = "inline-block";
     } else {
       editorTitle.textContent = "Add Problem";
@@ -118,110 +199,123 @@ document.addEventListener("DOMContentLoaded", () => {
       deleteBtn.style.display = "none";
     }
     modal.style.display = "flex";
+    // run MathJax on editor content if needed (editor is plain textarea, so not required)
   }
 
-  closeEditorBtn.addEventListener("click", () => closeModal());
+  function closeModal() { editingDocId = null; modal.style.display = "none"; }
 
-  deleteBtn.addEventListener("click", () => {
-    if (!editingId) return;
-    if (!confirm("Delete this problem?")) return;
-    problems = problems.filter(p => p.id !== editingId);
-    saveProblemsToStore(problems);
-    renderProblems(problems);
-    closeModal();
-  });
-
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const title = titleField.value.trim();
-    const statement = statementField.value.trim();
-    const solution = solutionField.value.trim();
-    const tags = tagsField.value.split(",").map(s => s.trim()).filter(Boolean);
-    const images = imagesField.value.split("\n").map(s => s.trim()).filter(Boolean);
-
-    if (!title) { alert("Please add a title"); return; }
-
-    if (editingId) {
-      // update
-      const idx = problems.findIndex(p => p.id === editingId);
-      if (idx === -1) { alert("Problem not found"); return; }
-      const existing = problems[idx];
-      problems[idx] = {
-        ...existing,
-        title, statement, solution, tags, images,
-        updatedAt: new Date().toISOString()
-      };
-      // Todo: Firestore update hook here
-    } else {
-      // create
-      const newProblem = {
-        id: genId(),
-        title, statement, solution, tags, images,
-        createdAt: new Date().toISOString()
-      };
-      problems.unshift(newProblem);
-      // Todo: Firestore addDoc hook here
+  // load problems into `problems` array
+  async function loadProblems() {
+    try {
+      const q = query(collection(db, "problems"), orderBy("createdAt", "desc"));
+      const snap = await getDocs(q);
+      problems = snap.docs.map(d => {
+        const data = d.data();
+        return {
+          _docId: d.id,
+          id: data.id ?? null,
+          title: data.title ?? "",
+          statement: data.statement ?? "",
+          solution: data.solution ?? "",
+          tags: data.tags ?? [],
+          images: data.images ?? [],
+          createdAt: data.createdAt ?? null,
+          updatedAt: data.updatedAt ?? null
+        };
+      });
+    } catch (err) {
+      console.error("Failed to load problems:", err);
+      problems = [];
     }
+  }
 
-    saveProblemsToStore(problems);
-    renderProblems(problems);
-    closeModal();
-  });
-
-  function closeModal() {
-    editingId = null;
-    modal.style.display = "none";
+  function sortProblems() {
+    problems.sort((a,b) => {
+      return toMillis(b.createdAt) - toMillis(a.createdAt);
+    });
   }
 
   function renderProblems(list) {
-    // sort newest first
-    list.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
-    problemsList.innerHTML = "";
+    problemsListEl.innerHTML = "";
     if (!list.length) {
-      problemsList.innerHTML = `<div style="padding:20px;color:#555">No problems found.</div>`;
+      problemsListEl.innerHTML = `<div style="padding:20px;color:#555">No problems found.</div>`;
       return;
     }
-    list.forEach(p => {
+
+    for (const p of list) {
+      const createdPretty = formatDateNice(p.createdAt);
+      const snippet = truncate(stripTags(p.statement || ""), 200);
       const card = document.createElement("div");
       card.className = "card";
-      const createdPretty = formatDateNice(p.createdAt);
-      const snippet = truncate(stripTags(p.statement||""), 160);
       card.innerHTML = `
-        <h3 style="margin-bottom:6px">${escapeHtml(p.title || "(no title)")}</h3>
-        <p style="color:#444;margin-bottom:8px">${escapeHtml(snippet)}</p>
-        <div class="meta">📅 Created: ${createdPretty}</div>
-        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
-          <button class="btn edit-btn" data-id="${p.id}">Edit</button>
-          <button class="btn view-btn" data-id="${p.id}" style="background:#555;">View</button>
+        <h3>${escapeHtml(p.title || "(no title)")}</h3>
+        <p>${escapeHtml(snippet)}</p>
+        <div class="meta">ID: ${p.id ?? "(no id)"} &nbsp;•&nbsp; 📅 Created: ${createdPretty}</div>
+        <div class="actions">
+          <button class="btn edit-btn" data-doc="${p._docId}">Edit</button>
+          <button class="btn view-btn" data-doc="${p._docId}" style="background:#555;">View</button>
         </div>
       `;
-      problemsList.appendChild(card);
+      problemsListEl.appendChild(card);
+    }
+
+    // bind actions
+    problemsListEl.querySelectorAll(".edit-btn").forEach(b => {
+      b.addEventListener("click", (e) => {
+        const id = e.currentTarget.dataset.doc;
+        openEditor(id);
+      });
+    });
+    problemsListEl.querySelectorAll(".view-btn").forEach(b => {
+      b.addEventListener("click", (e) => {
+        const id = e.currentTarget.dataset.doc;
+        window.open(`problem.html?id=${encodeURIComponent(id)}`, "_blank");
+      });
     });
 
-    // hook actions
-    problemsList.querySelectorAll(".edit-btn").forEach(b => b.addEventListener("click", e => openEditor(e.target.dataset.id)));
-    problemsList.querySelectorAll(".view-btn").forEach(b => b.addEventListener("click", e => {
-      const id = e.target.dataset.id;
-      window.open(`problem.html?id=${encodeURIComponent(id)}`, "_blank");
-    }));
+    // typeset math for any math in titles/snippets
+    if (window.MathJax && window.MathJax.typesetPromise) {
+      MathJax.typesetPromise();
+    }
   }
 
-  // store helpers
-  function loadProblemsFromStore() {
+  // Transaction helper to atomically increment meta/counters.problems and return new value
+  async function getNextProblemNumericId() {
+    const counterRef = doc(db, "meta", "counters");
+    const next = await runTransaction(db, async (tx) => {
+      const snap = await tx.get(counterRef);
+      if (!snap.exists()) {
+        // If no counters doc, create it with problems:1 and return 1
+        tx.set(counterRef, { problems: 1 }, { merge: true });
+        return 1;
+      }
+      const cur = (snap.data().problems || 0);
+      const nxt = cur + 1;
+      tx.update(counterRef, { problems: nxt });
+      return nxt;
+    });
+    return next;
+  }
+
+  // utility helpers
+  function toMillis(ts) {
+    if (!ts) return 0;
     try {
-      const raw = localStorage.getItem(STORE_KEY);
-      if (!raw) return [];
-      return JSON.parse(raw);
-    } catch (err) { console.error(err); return []; }
+      if (typeof ts.toDate === "function") return ts.toDate().getTime();
+      if (ts.seconds) return ts.seconds * 1000 + (ts.nanoseconds || 0)/1e6;
+      if (typeof ts === "string") return new Date(ts).getTime();
+      if (typeof ts === "number") return ts;
+    } catch(e){}
+    return 0;
   }
-  function saveProblemsToStore(arr) {
-    localStorage.setItem(STORE_KEY, JSON.stringify(arr));
+  function formatDateNice(ts) {
+    if (!ts) return "unknown";
+    const ms = toMillis(ts);
+    if (!ms) return "unknown";
+    const d = new Date(ms);
+    return d.toLocaleDateString(undefined, { day:'2-digit', month:'short', year:'numeric' });
   }
-
-  // small utilities
-  function genId(){ return 'p_' + Math.random().toString(36).slice(2,10); }
   function truncate(s,n=140){ if(!s) return ""; return s.length>n ? s.slice(0,n-1)+"…" : s; }
-  function stripTags(s){ return String(s||"").replace(/<\/?[^>]+(>|$)/g, ""); }
-  function escapeHtml(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
-  function formatDateNice(iso){ if(!iso) return "unknown"; const d = new Date(iso); if (isNaN(d)) return iso; return d.toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'}); }
+  function stripTags(s){ return String(s||"").replace(/<\/?[^>]+(>|$)/g,""); }
+  function escapeHtml(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 });
