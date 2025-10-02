@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Problem - Az-Math</title>
   <link rel="stylesheet" href="css/style.css" />
   <script type="module" src="js/main.js" defer></script>
@@ -10,7 +10,6 @@
   <script type="module" src="js/problem.js" defer></script>
 </head>
 <body>
-  <!-- Top Navbar -->
   <header class="navbar">
     <div class="nav-left">
       <button class="hamburger" id="menu-toggle">☰</button>
@@ -21,7 +20,6 @@
     </div>
   </header>
 
-  <!-- Sidebar -->
   <nav class="sidebar" id="sidebar">
     <ul>
       <li><a href="index.html">Home</a></li>
@@ -30,16 +28,15 @@
     </ul>
   </nav>
 
-  <!-- Dynamic Menu -->
   <div id="menu"></div>
 
-  <!-- Main Content -->
   <main class="content">
     <h1 id="problem-title">Loading problem...</h1>
-    <div id="problem-statement" class="problem-statement">Please wait</div>
+    <div class="meta" id="problem-meta" style="margin-bottom:12px"> </div>
+    <div id="problem-statement" class="problem-statement">Please wait...</div>
 
-    <button id="show-solution" class="btn" style="display:none;">Show Solution</button>
-    <div id="solution-container" style="display:none;"></div>
+    <button id="show-solution" class="btn" style="display:none;margin-top:12px;">Show Solution</button>
+    <div id="solution-container" style="display:none;margin-top:12px;"></div>
   </main>
 </body>
 </html>
