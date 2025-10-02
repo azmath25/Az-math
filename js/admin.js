@@ -6,7 +6,6 @@ import {
   addDoc,
   getDocs,
   query,
-  where,
   doc,
   updateDoc,
   getDoc,
@@ -22,10 +21,17 @@ const tabContents = document.querySelectorAll(".tab-content");
 
 tabButtons.forEach((btn) => {
   btn.addEventListener("click", () => {
+    // deactivate all
     tabButtons.forEach((b) => b.classList.remove("active"));
     tabContents.forEach((c) => c.classList.remove("active"));
+
+    // activate selected
     btn.classList.add("active");
-    document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
+    const tabId = "tab-" + btn.dataset.tab;
+    const tabEl = document.getElementById(tabId);
+    if (tabEl) {
+      tabEl.classList.add("active");
+    }
   });
 });
 
@@ -61,6 +67,7 @@ if (problemForm) {
       alert("Problem added with ID " + id);
       problemForm.reset();
     } catch (err) {
+      console.error(err);
       alert("Error adding problem: " + err.message);
     }
   });
@@ -86,69 +93,76 @@ if (lessonForm) {
       alert("Lesson added with ID " + id);
       lessonForm.reset();
     } catch (err) {
+      console.error(err);
       alert("Error adding lesson: " + err.message);
     }
   });
 }
 
 // ----- Search Problems -----
-document.getElementById("search-problem-btn")?.addEventListener("click", async () => {
-  const term = document.getElementById("search-problem").value.toLowerCase();
-  const q = query(collection(db, "problems"));
-  const snapshot = await getDocs(q);
-  const list = document.getElementById("problems-list");
-  list.innerHTML = "";
-  snapshot.forEach((docSnap) => {
-    const p = docSnap.data();
-    if (
-      p.title.toLowerCase().includes(term) ||
-      p.statement.toLowerCase().includes(term) ||
-      p.id.toString() === term
-    ) {
-      list.innerHTML += `<div class="card"><h3>${p.title}</h3><p>${p.statement}</p></div>`;
-    }
+const searchProblemBtn = document.getElementById("search-problem-btn");
+if (searchProblemBtn) {
+  searchProblemBtn.addEventListener("click", async () => {
+    const term = document.getElementById("search-problem").value.toLowerCase();
+    const snapshot = await getDocs(query(collection(db, "problems")));
+    const list = document.getElementById("problems-list");
+    list.innerHTML = "";
+    snapshot.forEach((docSnap) => {
+      const p = docSnap.data();
+      if (
+        p.title.toLowerCase().includes(term) ||
+        p.statement.toLowerCase().includes(term) ||
+        p.id.toString() === term
+      ) {
+        list.innerHTML += `<div class="card"><h3>${p.title}</h3><p>${p.statement}</p></div>`;
+      }
+    });
   });
-});
+}
 
 // ----- Search Lessons -----
-document.getElementById("search-lesson-btn")?.addEventListener("click", async () => {
-  const term = document.getElementById("search-lesson").value.toLowerCase();
-  const q = query(collection(db, "lessons"));
-  const snapshot = await getDocs(q);
-  const list = document.getElementById("lessons-list");
-  list.innerHTML = "";
-  snapshot.forEach((docSnap) => {
-    const l = docSnap.data();
-    if (
-      l.title.toLowerCase().includes(term) ||
-      l.content.toLowerCase().includes(term) ||
-      l.id.toString() === term
-    ) {
-      list.innerHTML += `<div class="card"><h3>${l.title}</h3><p>${l.content}</p></div>`;
-    }
+const searchLessonBtn = document.getElementById("search-lesson-btn");
+if (searchLessonBtn) {
+  searchLessonBtn.addEventListener("click", async () => {
+    const term = document.getElementById("search-lesson").value.toLowerCase();
+    const snapshot = await getDocs(query(collection(db, "lessons")));
+    const list = document.getElementById("lessons-list");
+    list.innerHTML = "";
+    snapshot.forEach((docSnap) => {
+      const l = docSnap.data();
+      if (
+        l.title.toLowerCase().includes(term) ||
+        l.content.toLowerCase().includes(term) ||
+        l.id.toString() === term
+      ) {
+        list.innerHTML += `<div class="card"><h3>${l.title}</h3><p>${l.content}</p></div>`;
+      }
+    });
   });
-});
+}
 
-// ----- Search Users & Role Management -----
-document.getElementById("search-user-btn")?.addEventListener("click", async () => {
-  const term = document.getElementById("search-user").value.toLowerCase();
-  const q = query(collection(db, "users"));
-  const snapshot = await getDocs(q);
-  const list = document.getElementById("users-list");
-  list.innerHTML = "";
-  snapshot.forEach((docSnap) => {
-    const u = docSnap.data();
-    if (u.email.toLowerCase().includes(term) || u.role.toLowerCase().includes(term)) {
-      list.innerHTML += `
-        <div class="card">
-          <h3>${u.email}</h3>
-          <p>Role: ${u.role}</p>
-          <button class="btn" onclick="window.changeRole('${docSnap.id}','admin')">Make Admin</button>
-          <button class="btn" onclick="window.changeRole('${docSnap.id}','user')">Make User</button>
-        </div>`;
-    }
+// ----- Search Users -----
+const searchUserBtn = document.getElementById("search-user-btn");
+if (searchUserBtn) {
+  searchUserBtn.addEventListener("click", async () => {
+    const term = document.getElementById("search-user").value.toLowerCase();
+    const snapshot = await getDocs(query(collection(db, "users")));
+    const list = document.getElementById("users-list");
+    list.innerHTML = "";
+    snapshot.forEach((docSnap) => {
+      const u = docSnap.data();
+      if (u.email.toLowerCase().includes(term) || u.role.toLowerCase().includes(term)) {
+        list.innerHTML += `
+          <div class="card">
+            <h3>${u.email}</h3>
+            <p>Role: ${u.role}</p>
+            <button class="btn" onclick="window.changeRole('${docSnap.id}','admin')">Make Admin</button>
+            <button class="btn" onclick="window.changeRole('${docSnap.id}','user')">Make User</button>
+          </div>`;
+      }
+    });
   });
-});
+}
 
 // ----- Change Role -----
 window.changeRole = async (uid, role) => {
@@ -156,6 +170,7 @@ window.changeRole = async (uid, role) => {
     await updateDoc(doc(db, "users", uid), { role });
     alert("Role updated to " + role);
   } catch (err) {
+    console.error(err);
     alert("Error updating role: " + err.message);
   }
 };
