@@ -5,24 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Profile - Az-Math</title>
   <link rel="stylesheet" href="css/style.css" />
+  <script type="module" src="js/main.js" defer></script>
+  <script type="module" src="js/menu.js" defer></script>
   <script type="module" src="js/profile.js" defer></script>
 </head>
 <body>
-  <!-- Navbar -->
   <header class="navbar">
     <div class="nav-left">
       <button class="hamburger" id="menu-toggle">☰</button>
       <span class="site-title">Az-Math</span>
     </div>
     <div class="nav-right">
-      <img src="assets/img/defaultprofile.png" alt="Profile" class="profile-icon" id="profile-photo">
+      <img src="assets/img/defaultprofile.png" class="profile-icon" id="profile-photo">
     </div>
   </header>
 
-  <!-- Dynamic Menu -->
+  <nav class="sidebar" id="sidebar">
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="problems.html">Problems</a></li>
+      <li><a href="lessons.html">Lessons</a></li>
+    </ul>
+  </nav>
+
   <div id="menu"></div>
 
-  <!-- Profile Content -->
   <main class="content">
     <h1>Profile</h1>
     <p><strong>Email:</strong> <span id="user-email">Loading...</span></p>
@@ -30,8 +37,8 @@
 
     <section id="admin-section" style="display:none;">
       <h2>Admin Controls</h2>
-      <p>As an admin, you can manage the site:</p>
-      <button onclick="location.href='admin.html'" class="btn">Go to Admin Panel</button>
+      <p>You can manage problems and lessons:</p>
+      <a href="admin.html" class="btn">Go to Admin Panel</a>
     </section>
   </main>
 </body>
