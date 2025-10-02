@@ -1,27 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Problems - Az-Math</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Problem - Az-Math</title>
   <link rel="stylesheet" href="css/style.css" />
+  <script defer src="js/firebase.js"></script>
+  <script defer src="js/problem.js"></script>
 </head>
 <body>
-  <div id="menu"></div>
-
-  <main class="container">
-    <h1>Problems</h1>
-    <div id="filters" class="card">
-      <input id="search" placeholder="Search problems..." />
-      <button id="btnSearch">Search</button>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="nav-left">
+      <button class="hamburger" id="menu-toggle">☰</button>
+      <span class="site-title">Az-Math</span>
     </div>
+    <div class="nav-right">
+      <img src="assets/img/defaultprofile.png" alt="Profile" class="profile-icon" id="profile-photo">
+    </div>
+  </header>
 
-    <div id="problems-list" class="grid"></div>
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="problems.html">Problems</a></li>
+      <li><a href="lessons.html">Lessons</a></li>
+    </ul>
+  </nav>
+
+  <!-- Problem Section -->
+  <main class="content">
+    <h1 id="problem-title">Problem Title</h1>
+    <p id="problem-statement">Loading problem...</p>
+
+    <button id="show-solution" class="btn">Show Solution</button>
+    <div id="solution-container" style="display:none;">
+      <!-- Solutions (text + images) load here -->
+    </div>
   </main>
 
-  <script type="module" src="js/firebase.js"></script>
-  <script type="module" src="js/menu.js"></script>
-  <script type="module" src="js/problems.js"></script>
+  <script src="js/menu.js"></script>
 </body>
 </html>
-
