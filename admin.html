@@ -33,68 +33,49 @@
   <main class="content">
     <h1>Admin Panel</h1>
 
-    <!-- Tabs -->
     <div class="tabs">
       <button class="tab-btn active" data-tab="problems">Problems</button>
       <button class="tab-btn" data-tab="lessons">Lessons</button>
       <button class="tab-btn" data-tab="users">Users</button>
     </div>
 
-    <!-- Problems Tab -->
+    <!-- Problems -->
     <section class="tab-content active" id="tab-problems">
       <h2>Manage Problems</h2>
-
-      <!-- Add Problem -->
       <div class="form-container">
-        <h3>Add New Problem</h3>
         <form id="add-problem-form">
           <input type="text" id="problem-title" placeholder="Problem Title" required />
-          <textarea id="problem-statement" placeholder="Problem Statement (LaTeX supported)" required></textarea>
-          <textarea id="problem-solution" placeholder="Solution (LaTeX supported)" required></textarea>
+          <textarea id="problem-statement" placeholder="Problem Statement" required></textarea>
+          <textarea id="problem-solution" placeholder="Solution" required></textarea>
           <button type="submit" class="btn">Add Problem</button>
         </form>
       </div>
 
-      <!-- Search Problems -->
-      <div class="form-container">
-        <h3>Search Problems</h3>
-        <input type="text" id="search-problem" placeholder="Search by ID, title, or content" />
-        <div id="problems-list" class="card-grid"></div>
-      </div>
+      <input type="text" id="search-problem" placeholder="Search problems..." />
+      <div id="problems-list" class="card-grid"></div>
     </section>
 
-    <!-- Lessons Tab -->
+    <!-- Lessons -->
     <section class="tab-content" id="tab-lessons">
       <h2>Manage Lessons</h2>
-
-      <!-- Add Lesson -->
       <div class="form-container">
-        <h3>Add New Lesson</h3>
         <form id="add-lesson-form">
           <input type="text" id="lesson-title" placeholder="Lesson Title" required />
           <input type="text" id="lesson-cover" placeholder="Cover Image URL (optional)" />
-          <textarea id="lesson-content" placeholder="Lesson Content (blocks: text, image, problem)" required></textarea>
+          <textarea id="lesson-content" placeholder="Lesson Content" required></textarea>
           <button type="submit" class="btn">Add Lesson</button>
         </form>
       </div>
 
-      <!-- Search Lessons -->
-      <div class="form-container">
-        <h3>Search Lessons</h3>
-        <input type="text" id="search-lesson" placeholder="Search by ID, title, or content" />
-        <div id="lessons-list" class="card-grid"></div>
-      </div>
+      <input type="text" id="search-lesson" placeholder="Search lessons..." />
+      <div id="lessons-list" class="card-grid"></div>
     </section>
 
-    <!-- Users Tab -->
+    <!-- Users -->
     <section class="tab-content" id="tab-users">
       <h2>Manage Users</h2>
-
-      <div class="form-container">
-        <h3>Search Users</h3>
-        <input type="text" id="search-user" placeholder="Search by email or UID" />
-        <div id="users-list" class="card-grid"></div>
-      </div>
+      <input type="text" id="search-user" placeholder="Search users..." />
+      <div id="users-list" class="card-grid"></div>
     </section>
   </main>
 </body>
