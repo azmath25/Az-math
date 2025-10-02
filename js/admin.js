@@ -2,92 +2,133 @@
 import { db } from "./firebase.js";
 import { protectAdminPage } from "./auth.js";
 import {
-  doc, setDoc, getDoc, updateDoc, collection
+  collection,
+  addDoc,
+  query,
+  where,
+  getDocs
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
 // Protect page
 protectAdminPage();
 
-// --- Tab switching ---
-const tabButtons = document.querySelectorAll(".tab-btn");
-const tabContents = document.querySelectorAll(".tab-content");
-
-tabButtons.forEach(btn => {
+/* ---------- Tab Switching ---------- */
+document.querySelectorAll(".tab-btn").forEach(btn => {
   btn.addEventListener("click", () => {
-    tabButtons.forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
     btn.classList.add("active");
-
-    tabContents.forEach(c => c.classList.remove("active"));
     document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
   });
 });
 
-// --- ID generator helper ---
-async function getNextId(type) {
-  const metaRef = doc(db, "meta", type);
-  const snap = await getDoc(metaRef);
-  let id = 1;
-  if (snap.exists()) {
-    id = snap.data().lastId + 1;
-    await updateDoc(metaRef, { lastId: id });
-  } else {
-    await setDoc(metaRef, { lastId: id });
-  }
-  return id;
-}
-
-// --- Add Problem ---
-const problemForm = document.getElementById("add-problem-form");
-problemForm?.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const title = document.getElementById("problem-title").value;
-  const statement = document.getElementById("problem-statement").value;
-  const solution = document.getElementById("problem-solution").value;
-
-  try {
-    const id = await getNextId("problems");
-    await setDoc(doc(db, "problems", id.toString()), {
-      id, title, statement, solution
-    });
-    alert("Problem added with ID " + id);
-    problemForm.reset();
-  } catch (err) {
-    alert("Error: " + err.message);
-  }
-});
-
-// --- Add Lesson ---
-const lessonForm = document.getElementById("add-lesson-form");
-lessonForm?.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const title = document.getElementById("lesson-title").value;
-  const cover = document.getElementById("lesson-cover").value;
-  const content = document.getElementById("lesson-content").value;
-
-  try {
-    const id = await getNextId("lessons");
-    await setDoc(doc(db, "lessons", id.toString()), {
-      id, title, cover, content
-    });
-    alert("Lesson added with ID " + id);
-    lessonForm.reset();
-  } catch (err) {
-    alert("Error: " + err.message);
-  }
-});
-
-// --- Simple client-side search ---
-function setupSearch(inputId, listId) {
-  const input = document.getElementById(inputId);
-  if (!input) return;
-  input.addEventListener("input", () => {
-    const query = input.value.toLowerCase();
-    document.querySelectorAll(`#${listId} .card`).forEach(card => {
-      card.style.display = card.textContent.toLowerCase().includes(query) ? "block" : "none";
-    });
+/* ---------- Toggle Add Problem Form ---------- */
+const addProblemBtn = document.getElementById("btn-add-problem");
+if (addProblemBtn) {
+  addProblemBtn.addEventListener("click", () => {
+    document.getElementById("add-problem-container").classList.toggle("hidden");
   });
 }
 
-setupSearch("search-problem", "problems-list");
-setupSearch("search-lesson", "lessons-list");
-setupSearch("search-user", "users-list");
+/* ---------- Toggle Add Lesson Form ---------- */
+const addLessonBtn = document.getElementById("btn-add-lesson");
+if (addLessonBtn) {
+  addLessonBtn.addEventListener("click", () => {
+    document.getElementById("add-lesson-container").classList.toggle("hidden");
+  });
+}
+
+/* ---------- Add Problem ---------- */
+const problemForm = document.getElementById("add-problem-form");
+if (problemForm) {
+  problemForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const title = document.getElementById("problem-title").value.trim();
+    const statement = document.getElementById("problem-statement").value.trim();
+    const solution = document.getElementById("problem-solution").value.trim();
+
+    if (!title || !statement) return alert("Fill in all fields!");
+
+    try {
+      await addDoc(collection(db, "problems"), { title, statement, solution });
+      alert("Problem added!");
+      problemForm.reset();
+      document.getElementById("add-problem-container").classList.add("hidden");
+    } catch (err) {
+      alert("Error adding problem: " + err.message);
+    }
+  });
+}
+
+/* ---------- Add Lesson ---------- */
+const lessonForm = document.getElementById("add-lesson-form");
+if (lessonForm) {
+  lessonForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const title = document.getElementById("lesson-title").value.trim();
+    const content = document.getElementById("lesson-content").value.trim();
+
+    if (!title || !content) return alert("Fill in all fields!");
+
+    try {
+      await addDoc(collection(db, "lessons"), { title, content });
+      alert("Lesson added!");
+      lessonForm.reset();
+      document.getElementById("add-lesson-container").classList.add("hidden");
+    } catch (err) {
+      alert("Error adding lesson: " + err.message);
+    }
+  });
+}
+
+/* ---------- Search Problems (basic Firestore query) ---------- */
+const searchProblemBtn = document.getElementById("btn-search-problem");
+if (searchProblemBtn) {
+  searchProblemBtn.addEventListener("click", async () => {
+    const term = document.getElementById("search-problem").value.trim();
+    if (!term) return alert("Enter search text");
+
+    const q = query(collection(db, "problems"), where("title", "==", term));
+    const snap = await getDocs(q);
+
+    const list = document.getElementById("problems-list");
+    list.innerHTML = "";
+    snap.forEach(doc => {
+      const d = doc.data();
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `<h3>${d.title}</h3><p>${d.statement}</p>`;
+      list.appendChild(card);
+    });
+
+    if (snap.empty) {
+      list.innerHTML = `<p>No problems found for "${term}"</p>`;
+    }
+  });
+}
+
+/* ---------- Search Lessons (basic) ---------- */
+const searchLessonBtn = document.getElementById("btn-search-lesson");
+if (searchLessonBtn) {
+  searchLessonBtn.addEventListener("click", async () => {
+    const term = document.getElementById("search-lesson").value.trim();
+    if (!term) return alert("Enter search text");
+
+    const q = query(collection(db, "lessons"), where("title", "==", term));
+    const snap = await getDocs(q);
+
+    const list = document.getElementById("lessons-list");
+    list.innerHTML = "";
+    snap.forEach(doc => {
+      const d = doc.data();
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `<h3>${d.title}</h3><p>${d.content}</p>`;
+      list.appendChild(card);
+    });
+
+    if (snap.empty) {
+      list.innerHTML = `<p>No lessons found for "${term}"</p>`;
+    }
+  });
+}
