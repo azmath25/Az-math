@@ -1,32 +1,32 @@
-// js/problems.js
+// js/problem.js
 import { db } from "./firebase.js";
-import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-const container = document.getElementById("problems-list");
-const searchInput = document.getElementById("search");
-const btnSearch = document.getElementById("btnSearch");
+function getProblemId() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("id");
+}
 
-async function loadProblems() {
-  if (!container) return;
-  container.innerHTML = "Loading problems...";
-  try {
-    const q = query(collection(db, "problems"), orderBy("title"));
-    const snap = await getDocs(q);
-    container.innerHTML = "";
-    snap.forEach(doc => {
-      const d = doc.data();
-      const card = document.createElement("div");
-      card.className = "problem-card";
-      card.innerHTML = `<h3>${d.title || "Untitled"}</h3>
-                        <small>${(d.category || "")}</small>
-                        <p>${(d.statement || "").slice(0,200)}${(d.statement && d.statement.length>200 ? "..." : "")}</p>
-                        <button onclick="location.href='problem.html?id=${doc.id}'">Open</button>`;
-      container.appendChild(card);
+async function loadProblem() {
+  const id = getProblemId();
+  if (!id) return;
+
+  const snap = await getDoc(doc(db, "problems", id));
+  if (snap.exists()) {
+    const data = snap.data();
+    document.getElementById("problem-title").textContent = data.title;
+    document.getElementById("problem-statement").textContent = data.statement;
+
+    const solutionBtn = document.getElementById("show-solution");
+    const solContainer = document.getElementById("solution-container");
+
+    solutionBtn.addEventListener("click", () => {
+      solContainer.style.display = "block";
+      solContainer.innerHTML = data.solution || "<p>No solution yet.</p>";
     });
-  } catch (err) {
-    container.innerHTML = "Error loading problems: " + err.message;
+  } else {
+    document.getElementById("problem-title").textContent = "Problem not found";
   }
 }
 
-if (btnSearch) btnSearch.addEventListener("click", loadProblems);
-loadProblems();
+loadProblem();
