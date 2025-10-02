@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lessons - Az-Math</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script defer src="js/firebase.js"></script>
+  <script defer src="js/lessons.js"></script>
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="nav-left">
+      <button class="hamburger" id="menu-toggle">☰</button>
+      <span class="site-title">Az-Math</span>
+    </div>
+    <div class="nav-right">
+      <img src="assets/img/defaultprofile.png" alt="Profile" class="profile-icon" id="profile-photo">
+    </div>
+  </header>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="problems.html">Problems</a></li>
+      <li><a href="admin.html">Admin</a></li>
+    </ul>
+  </nav>
+
+  <!-- Lessons Section -->
+  <main class="content">
+    <h1>Lessons</h1>
+    <div id="lessons-list" class="card-grid">
+      <!-- Lessons cards appear here -->
+    </div>
+  </main>
+
+  <script src="js/menu.js"></script>
+</body>
+</html>
