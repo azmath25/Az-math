@@ -1,39 +1,61 @@
 // js/menu.js
 import { auth } from "./firebase.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-import { getUserRole, logout } from "./auth.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+import { getUserRole } from "./auth.js";
 
-const root = document.getElementById("menu");
+const menuDiv = document.getElementById("menu");
 
-function renderMenu(items) {
-  root.innerHTML = `
-    <nav class="menu">
-      <button onclick="location.href='index.html'">Home</button>
-      <button onclick="location.href='problems.html'">Problems</button>
-      <button onclick="location.href='lessons.html'">Lessons</button>
-      ${items.join("")}
-    </nav>
-  `;
+function renderMenu(buttons) {
+  if (!menuDiv) return;
+  menuDiv.innerHTML = "";
+  const container = document.createElement("div");
+  container.className = "menu";
+  buttons.forEach(btn => container.appendChild(btn));
+  menuDiv.appendChild(container);
+}
+
+function makeBtn(label, href, onclick) {
+  const btn = document.createElement("button");
+  btn.textContent = label;
+  if (onclick) btn.onclick = onclick;
+  else if (href) btn.onclick = () => (window.location.href = href);
+  return btn;
 }
 
 onAuthStateChanged(auth, async (user) => {
+  if (!menuDiv) return;
+
+  // base nav visible to all
+  const base = [
+    makeBtn("Home", "index.html"),
+    makeBtn("Problems", "problems.html"),
+    makeBtn("Lessons", "lessons.html")
+  ];
+
   if (!user) {
-    renderMenu([`<button onclick="location.href='login.html'">Login</button>`]);
+    renderMenu([...base, makeBtn("Login", "login.html")]);
     return;
   }
 
-  const role = await getUserRole(user.uid);
-  const profileLabel = role === "admin" ? "(Admin) Profile" : "(User) Profile";
-
-  let items = [
-    `<button onclick="location.href='profile.html'">${profileLabel}</button>`,
-    `<button onclick="import('./auth.js').then(m=>m.logout())">Logout</button>`
-  ];
-
-  if (role === "admin") {
-    // Add Admin link if the user is admin
-    items.splice(1, 0, `<button onclick="location.href='admin.html'">Admin</button>`);
+  // signed-in: ensure user doc exists & get role (pass email so auto-create has it)
+  let role = "user";
+  try {
+    role = await getUserRole(user.uid, user.email || "") || "user";
+  } catch (e) {
+    console.error("menu: getUserRole failed", e);
+    role = "user";
   }
 
-  renderMenu(items);
+  const profileBtn = makeBtn(role === "admin" ? "(Admin) Profile" : "(User) Profile", "profile.html");
+  const logoutBtn = makeBtn("Logout", null, async () => {
+    await signOut(auth);
+    window.location.href = "login.html";
+  });
+
+  if (role === "admin") {
+    const adminBtn = makeBtn("Admin", "admin.html");
+    renderMenu([...base, profileBtn, adminBtn, logoutBtn]);
+  } else {
+    renderMenu([...base, profileBtn, logoutBtn]);
+  }
 });
