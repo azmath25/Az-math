@@ -5,7 +5,7 @@ import { getFirestore } from "https://www.gstatic.com/firebasejs/12.3.0/firebase
 import { getStorage } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-storage.js";
 
 const firebaseConfig = {
-  apiKey: "YOUR-API-KEY",
+  apiKey: "AIzaSyCYrw8aLDGtbKXdou7YweLVBKLFXHyl9SM",
   authDomain: "az-math.firebaseapp.com",
   projectId: "az-math",
   storageBucket: "az-math.appspot.com",   // fixed
