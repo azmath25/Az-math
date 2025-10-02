@@ -3,7 +3,6 @@ import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/
 import { getUserRole } from "./auth.js";
 
 const menuDiv = document.getElementById("menu");
-console.log("menu.js loaded, menuDiv:", menuDiv);
 
 function renderMenu(buttons) {
   menuDiv.innerHTML = "";
@@ -22,25 +21,26 @@ function makeBtn(label, href, onclick) {
 }
 
 onAuthStateChanged(auth, async (user) => {
-  console.log("Auth state changed:", user);
+  if (!menuDiv) return;
 
-  if (!menuDiv) {
-    console.warn("No #menu div found!");
-    return;
-  }
+  // Base navigation links (shown to everyone)
+  const navBtns = [
+    makeBtn("Home", "index.html"),
+    makeBtn("Problems", "problems.html"),
+    makeBtn("Lessons", "lessons.html"),
+  ];
 
   if (!user) {
-    console.log("No user, rendering Login");
-    renderMenu([makeBtn("Login", "login.html")]);
+    // Unauthenticated → show Login
+    renderMenu([...navBtns, makeBtn("Login", "login.html")]);
   } else {
-    console.log("User logged in:", user.email);
+    // Logged in → add Profile + Logout
     let role = "user";
     try {
       role = await getUserRole(user.uid) || "user";
     } catch (e) {
       console.error("Role fetch failed", e);
     }
-    console.log("User role:", role);
 
     const profileBtn = makeBtn("Profile", "profile.html");
     const logoutBtn = makeBtn("Logout", null, async () => {
@@ -50,9 +50,9 @@ onAuthStateChanged(auth, async (user) => {
 
     if (role === "admin") {
       const adminBtn = makeBtn("Admin", "admin.html");
-      renderMenu([profileBtn, adminBtn, logoutBtn]);
+      renderMenu([...navBtns, profileBtn, adminBtn, logoutBtn]);
     } else {
-      renderMenu([profileBtn, logoutBtn]);
+      renderMenu([...navBtns, profileBtn, logoutBtn]);
     }
   }
 });
