@@ -7,58 +7,45 @@ import {
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
 
-const emailEl = document.getElementById("email");
-const passEl = document.getElementById("password");
-const loginBtn = document.getElementById("loginBtn");
-const registerBtn = document.getElementById("registerBtn");
-const logoutBtn = document.getElementById("logoutBtn");
-const userState = document.getElementById("userState");
-
-if (loginBtn) loginBtn.addEventListener("click", login);
-if (registerBtn) registerBtn.addEventListener("click", register);
-if (logoutBtn) logoutBtn.addEventListener("click", logout);
-
-export async function register() {
-  const email = emailEl.value.trim();
-  const password = passEl.value;
-  try {
-    await createUserWithEmailAndPassword(auth, email, password);
-    alert("Registered. Check profile.");
-  } catch (err) {
-    alert(err.message);
-  }
-}
-
-export async function login() {
-  const email = emailEl.value.trim();
-  const password = passEl.value;
+// Login
+export async function login(email, password) {
   try {
     await signInWithEmailAndPassword(auth, email, password);
-    alert("Logged in");
+    console.log("Logged in:", email);
+    window.location.href = "index.html"; // redirect after login
   } catch (err) {
-    alert(err.message);
+    console.error("Login failed:", err.message);
+    alert("Login failed: " + err.message);
   }
 }
 
-export async function logout() {
+// Register
+export async function register(email, password) {
   try {
-    await signOut(auth);
-    alert("Logged out");
+    await createUserWithEmailAndPassword(auth, email, password);
+    console.log("Registered:", email);
+    window.location.href = "index.html";
   } catch (err) {
-    alert(err.message);
+    console.error("Registration failed:", err.message);
+    alert("Registration failed: " + err.message);
   }
 }
 
+// Logout
+export async function logout() {
+  await signOut(auth);
+  console.log("User logged out");
+  window.location.href = "login.html";
+}
+
+// Listen for auth state changes
 onAuthStateChanged(auth, (user) => {
+  const profilePhoto = document.getElementById("profile-photo");
   if (user) {
-    userState.innerText = `Signed in: ${user.email}`;
-    if (loginBtn) loginBtn.style.display = "none";
-    if (registerBtn) registerBtn.style.display = "none";
-    if (logoutBtn) logoutBtn.style.display = "inline-block";
+    console.log("User logged in:", user.email);
+    if (profilePhoto) profilePhoto.title = user.email;
   } else {
-    userState.innerText = "Not signed in";
-    if (loginBtn) loginBtn.style.display = "inline-block";
-    if (registerBtn) registerBtn.style.display = "inline-block";
-    if (logoutBtn) logoutBtn.style.display = "none";
+    console.log("No user logged in");
+    if (profilePhoto) profilePhoto.title = "Guest";
   }
 });
