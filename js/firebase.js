@@ -8,7 +8,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyCYrw8aLDGtbKXdou7YweLVBKLFXHyl9SM",
   authDomain: "az-math.firebaseapp.com",
   projectId: "az-math",
-  storageBucket: "az-math.appspot.com",   // fixed
+  storageBucket: "az-math.firebasestorage.app",
   messagingSenderId: "49046309945",
   appId: "1:49046309945:web:a3be9525705860c75191e8"
 };
