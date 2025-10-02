@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Problems - Az-Math</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script defer src="js/firebase.js"></script>
+  <script defer src="js/problems.js"></script>
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="nav-left">
+      <button class="hamburger" id="menu-toggle">☰</button>
+      <span class="site-title">Az-Math</span>
+    </div>
+    <div class="nav-right">
+      <img src="assets/img/defaultprofile.png" alt="Profile" class="profile-icon" id="profile-photo">
+    </div>
+  </header>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="lessons.html">Lessons</a></li>
+      <li><a href="admin.html">Admin</a></li>
+    </ul>
+  </nav>
+
+  <!-- Problems List -->
+  <main class="content">
+    <h1>Problems</h1>
+    <div id="problems-list" class="card-grid">
+      <!-- Problems will be loaded here -->
+    </div>
+    <div class="pagination">
+      <button id="prev-page" class="btn">Prev</button>
+      <span id="page-info">Page 1</span>
+      <button id="next-page" class="btn">Next</button>
+    </div>
+  </main>
+
+  <script src="js/menu.js"></script>
+</body>
+</html>
