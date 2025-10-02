@@ -1,51 +1,58 @@
 // js/auth.js
-import { auth } from "./firebase.js";
+import { auth, db } from "./firebase.js";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-// Login
+// 🔎 Get role of user (admin or user)
+export async function getUserRole(uid) {
+  const userDoc = await getDoc(doc(db, "Users", uid));
+  if (userDoc.exists()) return userDoc.data().role || "user";
+  return "user"; // default
+}
+
+// 🔑 Login
 export async function login(email, password) {
   try {
     await signInWithEmailAndPassword(auth, email, password);
-    console.log("Logged in:", email);
-    window.location.href = "index.html"; // redirect after login
+    window.location.href = "index.html";
   } catch (err) {
-    console.error("Login failed:", err.message);
     alert("Login failed: " + err.message);
   }
 }
 
-// Register
+// 📝 Register (defaults to student "user")
 export async function register(email, password) {
   try {
-    await createUserWithEmailAndPassword(auth, email, password);
-    console.log("Registered:", email);
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    await setDoc(doc(db, "Users", cred.user.uid), { role: "user" });
     window.location.href = "index.html";
   } catch (err) {
-    console.error("Registration failed:", err.message);
     alert("Registration failed: " + err.message);
   }
 }
 
-// Logout
+// 🚪 Logout
 export async function logout() {
   await signOut(auth);
-  console.log("User logged out");
   window.location.href = "login.html";
 }
 
-// Listen for auth state changes
-onAuthStateChanged(auth, (user) => {
-  const profilePhoto = document.getElementById("profile-photo");
-  if (user) {
-    console.log("User logged in:", user.email);
-    if (profilePhoto) profilePhoto.title = user.email;
-  } else {
-    console.log("No user logged in");
-    if (profilePhoto) profilePhoto.title = "Guest";
-  }
-});
+// 🔒 Protect admin-only pages
+export async function protectAdminPage() {
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "login.html";
+      return;
+    }
+    const role = await getUserRole(user.uid);
+    if (role !== "admin") {
+      alert("You are not authorized to view this page.");
+      window.location.href = "index.html";
+    }
+  });
+}
