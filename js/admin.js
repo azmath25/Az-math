@@ -3,160 +3,140 @@ import { db } from "./firebase.js";
 import { protectAdminPage } from "./auth.js";
 import {
   collection,
+  addDoc,
   doc,
   getDoc,
-  runTransaction,
   setDoc,
+  updateDoc,
+  query,
+  where,
+  getDocs,
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
 // Protect page
 protectAdminPage();
 
-/**
- * Get the next numeric ID for either "problems" or "lessons"
- */
-async function getNextId(kind) {
-  const countersRef = doc(db, "counters", "main"); // one doc holding both
-  let newId = null;
-
-  await runTransaction(db, async (transaction) => {
-    const snap = await transaction.get(countersRef);
-    if (!snap.exists()) {
-      throw new Error("Counters document does not exist!");
-    }
-
-    const data = snap.data();
-    const current = data[kind] ?? 0;
-    newId = current + 1;
-    transaction.update(countersRef, { [kind]: newId });
+// ===== Tabs =====
+const tabButtons = document.querySelectorAll(".tab-btn");
+const tabContents = document.querySelectorAll(".tab-content");
+tabButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const tab = btn.dataset.tab;
+    tabButtons.forEach((b) => b.classList.remove("active"));
+    tabContents.forEach((c) => c.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById(`tab-${tab}`).classList.add("active");
   });
+});
 
-  return newId;
-}
-
-/**
- * Save a problem or lesson into Firestore with numeric ID
- */
-export async function saveToFirestore(kind, data) {
-  const newId = await getNextId(kind);
-  data.id = newId;
-
-  const ref = doc(db, kind, String(newId)); // store as numeric string
-  await setDoc(ref, data);
-
-  return newId;
-}
-
-// --- Problem Editor logic (sketch) ---
-const problemEditor = document.getElementById("problem-editor");
-const addStatementBtn = document.getElementById("add-statement-btn");
-const addSolutionBtn = document.getElementById("add-solution-btn");
-const previewProblemBtn = document.getElementById("preview-problem-btn");
-
-function createBlock(type, value = "") {
-  const block = document.createElement("div");
-  block.className = "editor-block";
-
-  if (type === "text") {
-    const textarea = document.createElement("textarea");
-    textarea.value = value;
-    textarea.placeholder = "Enter text...";
-    block.appendChild(textarea);
-  } else if (type === "image") {
-    const input = document.createElement("input");
-    input.type = "text";
-    input.value = value;
-    input.placeholder = "Enter image URL...";
-    block.appendChild(input);
+// ===== Helper: getNextId from meta =====
+async function getNextId(type) {
+  const metaRef = doc(db, "meta", type + "Counter");
+  const snap = await getDoc(metaRef);
+  let id = 1;
+  if (snap.exists()) {
+    id = (snap.data().last || 0) + 1;
   }
-
-  const delBtn = document.createElement("button");
-  delBtn.textContent = "✖";
-  delBtn.className = "delete-btn";
-  delBtn.onclick = () => block.remove();
-
-  block.appendChild(delBtn);
-  return block;
+  await setDoc(metaRef, { last: id });
+  return id;
 }
 
-// Add Statement
-if (addStatementBtn) {
-  addStatementBtn.onclick = () => {
-    if (!document.querySelector("#statement-section")) {
-      const section = document.createElement("div");
-      section.id = "statement-section";
-      section.innerHTML = `<h3>Statement</h3>`;
-      const addText = document.createElement("button");
-      addText.textContent = "Add Text Block";
-      addText.onclick = () => section.appendChild(createBlock("text"));
+// ===== Problems =====
+document.getElementById("add-problem-btn")?.addEventListener("click", async () => {
+  const title = prompt("Problem Title:");
+  if (!title) return;
+  const statement = prompt("Problem Statement:");
+  const solution = prompt("Problem Solution:");
 
-      const addImage = document.createElement("button");
-      addImage.textContent = "Add Image Block";
-      addImage.onclick = () => section.appendChild(createBlock("image"));
-
-      section.appendChild(addText);
-      section.appendChild(addImage);
-      problemEditor.appendChild(section);
-    }
-  };
-}
-
-// Add Solution
-if (addSolutionBtn) {
-  addSolutionBtn.onclick = () => {
-    const section = document.createElement("div");
-    section.className = "solution-section";
-    section.innerHTML = `<h3>Solution</h3>`;
-    const addText = document.createElement("button");
-    addText.textContent = "Add Text Block";
-    addText.onclick = () => section.appendChild(createBlock("text"));
-
-    const addImage = document.createElement("button");
-    addImage.textContent = "Add Image Block";
-    addImage.onclick = () => section.appendChild(createBlock("image"));
-
-    section.appendChild(addText);
-    section.appendChild(addImage);
-    problemEditor.appendChild(section);
-  };
-}
-
-// Preview Problem
-if (previewProblemBtn) {
-  previewProblemBtn.onclick = async () => {
-    const title = document.getElementById("problem-title").value;
-    const statementBlocks = [];
-    const solutionBlocks = [];
-
-    // collect statement
-    const statementSection = document.getElementById("statement-section");
-    if (statementSection) {
-      statementSection.querySelectorAll(".editor-block").forEach((b) => {
-        const input = b.querySelector("textarea, input");
-        statementBlocks.push({ type: input.tagName === "TEXTAREA" ? "text" : "image", value: input.value });
-      });
-    }
-
-    // collect solutions
-    document.querySelectorAll(".solution-section").forEach((sec) => {
-      const blocks = [];
-      sec.querySelectorAll(".editor-block").forEach((b) => {
-        const input = b.querySelector("textarea, input");
-        blocks.push({ type: input.tagName === "TEXTAREA" ? "text" : "image", value: input.value });
-      });
-      solutionBlocks.push(blocks);
-    });
-
-    const draft = {
+  try {
+    const id = await getNextId("problem");
+    await setDoc(doc(db, "problems", id.toString()), {
+      id,
       title,
-      statement: statementBlocks,
-      solutions: solutionBlocks,
-    };
+      statement,
+      solution,
+      createdAt: Date.now(),
+    });
+    alert("Problem added with ID " + id);
+  } catch (err) {
+    alert("Error: " + err.message);
+  }
+});
 
-    // Save draft to localStorage
-    localStorage.setItem("preview-problem", JSON.stringify(draft));
+// Search problems
+document.getElementById("search-problem-btn")?.addEventListener("click", async () => {
+  const term = document.getElementById("search-problem").value.toLowerCase();
+  const q = query(collection(db, "problems"));
+  const snap = await getDocs(q);
+  const listDiv = document.getElementById("problems-list");
+  listDiv.innerHTML = "";
 
-    // Open problem.html in preview mode
-    window.open(`problem.html?preview=true`, "_blank");
-  };
-}
+  snap.forEach((docSnap) => {
+    const data = docSnap.data();
+    if (
+      data.title?.toLowerCase().includes(term) ||
+      data.statement?.toLowerCase().includes(term) ||
+      data.id?.toString() === term
+    ) {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `<h3>#${data.id} - ${data.title}</h3><p>${data.statement?.slice(0,80)}...</p>`;
+      listDiv.appendChild(card);
+    }
+  });
+});
+
+// ===== Lessons =====
+document.getElementById("add-lesson-btn")?.addEventListener("click", async () => {
+  const title = prompt("Lesson Title:");
+  if (!title) return;
+  const content = prompt("Lesson Content:");
+
+  try {
+    const id = await getNextId("lesson");
+    await setDoc(doc(db, "lessons", id.toString()), {
+      id,
+      title,
+      content,
+      createdAt: Date.now(),
+    });
+    alert("Lesson added with ID " + id);
+  } catch (err) {
+    alert("Error: " + err.message);
+  }
+});
+
+// ===== Users =====
+document.getElementById("search-user-btn")?.addEventListener("click", async () => {
+  const term = document.getElementById("search-user").value.toLowerCase();
+  const q = query(collection(db, "Users"));
+  const snap = await getDocs(q);
+  const listDiv = document.getElementById("users-list");
+  listDiv.innerHTML = "";
+
+  snap.forEach((docSnap) => {
+    const data = docSnap.data();
+    if (data.email?.toLowerCase().includes(term)) {
+      const card = document.createElement("div");
+      card.className = "card";
+      const role = data.role || "user";
+      card.innerHTML = `
+        <h3>${data.email}</h3>
+        <p>Role: ${role}</p>
+        ${
+          role === "admin"
+            ? `<button disabled class="btn">Already Admin</button>`
+            : `<button class="btn" data-id="${docSnap.id}">Make Admin</button>`
+        }
+      `;
+      listDiv.appendChild(card);
+
+      if (role !== "admin") {
+        card.querySelector("button").addEventListener("click", async () => {
+          await updateDoc(doc(db, "Users", docSnap.id), { role: "admin" });
+          alert("Role updated to admin!");
+        });
+      }
+    }
+  });
+});
