@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Problem - Az-Math</title>
+  <title>Profile - Az-Math</title>
   <link rel="stylesheet" href="css/style.css" />
   <script type="module" src="js/main.js" defer></script>
   <script type="module" src="js/menu.js" defer></script>
-  <script type="module" src="js/problem.js" defer></script>
+  <script type="module" src="js/profile.js" defer></script>
 </head>
 <body>
+  <!-- Top Navbar -->
   <header class="navbar">
     <div class="nav-left">
       <button class="hamburger" id="menu-toggle">☰</button>
@@ -20,6 +21,7 @@
     </div>
   </header>
 
+  <!-- Sidebar -->
   <nav class="sidebar" id="sidebar">
     <ul>
       <li><a href="index.html">Home</a></li>
@@ -28,14 +30,30 @@
     </ul>
   </nav>
 
+  <!-- Dynamic Menu -->
   <div id="menu"></div>
 
+  <!-- Main Content -->
   <main class="content">
-    <h1 id="problem-title">Loading...</h1>
-    <p id="problem-statement">Loading problem...</p>
+    <h1>My Profile</h1>
 
-    <button id="show-solution" class="btn">Show Solution</button>
-    <div id="solution-container" style="display:none;"></div>
+    <!-- Profile Card -->
+    <div class="card profile-card">
+      <img src="assets/img/defaultprofile.png" id="user-photo" class="profile-photo-large" alt="Profile Photo">
+
+      <div class="profile-info">
+        <p><strong>Email:</strong> <span id="user-email">Loading...</span></p>
+        <p><strong>Role:</strong> <span id="user-role">Loading...</span></p>
+      </div>
+    </div>
+
+    <!-- Admin Section -->
+    <div id="admin-section" style="display:none; margin-top:20px;">
+      <div class="card">
+        <h2>Admin Controls</h2>
+        <button class="btn" onclick="location.href='admin.html'">Go to Admin Page</button>
+      </div>
+    </div>
   </main>
 </body>
 </html>
