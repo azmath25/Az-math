@@ -3,51 +3,45 @@ import { db } from "./firebase.js";
 import { protectAdminPage } from "./auth.js";
 import {
   collection,
-  addDoc,
-  getDocs,
-  query,
-  doc,
-  updateDoc,
+  setDoc,
   getDoc,
-  setDoc
+  getDocs,
+  doc,
+  query,
+  where
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-// Protect page
 protectAdminPage();
 
-// ----- Tab Switching -----
+// ---- Tab Switching ----
 const tabButtons = document.querySelectorAll(".tab-btn");
 const tabContents = document.querySelectorAll(".tab-content");
 
-tabButtons.forEach((btn) => {
+tabButtons.forEach(btn => {
   btn.addEventListener("click", () => {
-    // deactivate all
-    tabButtons.forEach((b) => b.classList.remove("active"));
-    tabContents.forEach((c) => c.classList.remove("active"));
+    tabButtons.forEach(b => b.classList.remove("active"));
+    tabContents.forEach(c => c.classList.remove("active"));
 
-    // activate selected
     btn.classList.add("active");
     const tabId = "tab-" + btn.dataset.tab;
-    const tabEl = document.getElementById(tabId);
-    if (tabEl) {
-      tabEl.classList.add("active");
-    }
+    const content = document.getElementById(tabId);
+    if (content) content.classList.add("active");
   });
 });
 
-// ----- Helper: Get Next ID -----
+// ---- ID generator (meta collection) ----
 async function getNextId(type) {
-  const ref = doc(db, "meta", type);
-  const snap = await getDoc(ref);
-  let newId = 1;
+  const metaRef = doc(db, "meta", type);
+  const snap = await getDoc(metaRef);
+  let nextId = 1;
   if (snap.exists()) {
-    newId = snap.data().lastId + 1;
+    nextId = (snap.data().lastId || 0) + 1;
   }
-  await setDoc(ref, { lastId: newId });
-  return newId;
+  await setDoc(metaRef, { lastId: nextId });
+  return nextId;
 }
 
-// ----- Add Problem -----
+// ---- Add Problem ----
 const problemForm = document.getElementById("add-problem-form");
 if (problemForm) {
   problemForm.addEventListener("submit", async (e) => {
@@ -58,119 +52,107 @@ if (problemForm) {
 
     try {
       const id = await getNextId("problems");
-      await setDoc(doc(db, "problems", id.toString()), {
-        id,
-        title,
-        statement,
-        solution,
-      });
+      await setDoc(doc(db, "problems", String(id)), { id, title, statement, solution });
       alert("Problem added with ID " + id);
       problemForm.reset();
     } catch (err) {
-      console.error(err);
       alert("Error adding problem: " + err.message);
     }
   });
 }
 
-// ----- Add Lesson -----
+// ---- Add Lesson ----
 const lessonForm = document.getElementById("add-lesson-form");
 if (lessonForm) {
   lessonForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const title = document.getElementById("lesson-title").value;
-    const cover = document.getElementById("lesson-cover").value;
     const content = document.getElementById("lesson-content").value;
 
     try {
       const id = await getNextId("lessons");
-      await setDoc(doc(db, "lessons", id.toString()), {
-        id,
-        title,
-        cover,
-        content,
-      });
+      await setDoc(doc(db, "lessons", String(id)), { id, title, content });
       alert("Lesson added with ID " + id);
       lessonForm.reset();
     } catch (err) {
-      console.error(err);
       alert("Error adding lesson: " + err.message);
     }
   });
 }
 
-// ----- Search Problems -----
-const searchProblemBtn = document.getElementById("search-problem-btn");
-if (searchProblemBtn) {
-  searchProblemBtn.addEventListener("click", async () => {
-    const term = document.getElementById("search-problem").value.toLowerCase();
-    const snapshot = await getDocs(query(collection(db, "problems")));
+// ---- Search Problems ----
+const problemSearchBtn = document.getElementById("search-problem-btn");
+if (problemSearchBtn) {
+  problemSearchBtn.addEventListener("click", async () => {
+    const term = document.getElementById("search-problem").value.trim().toLowerCase();
     const list = document.getElementById("problems-list");
     list.innerHTML = "";
-    snapshot.forEach((docSnap) => {
-      const p = docSnap.data();
+
+    const snapshot = await getDocs(collection(db, "problems"));
+    snapshot.forEach(docSnap => {
+      const data = docSnap.data();
       if (
-        p.title.toLowerCase().includes(term) ||
-        p.statement.toLowerCase().includes(term) ||
-        p.id.toString() === term
+        data.title.toLowerCase().includes(term) ||
+        data.statement.toLowerCase().includes(term) ||
+        String(data.id).includes(term)
       ) {
-        list.innerHTML += `<div class="card"><h3>${p.title}</h3><p>${p.statement}</p></div>`;
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `<h3>${data.title} (#${data.id})</h3>
+                          <p>${data.statement.substring(0, 100)}...</p>`;
+        list.appendChild(card);
       }
     });
   });
 }
 
-// ----- Search Lessons -----
-const searchLessonBtn = document.getElementById("search-lesson-btn");
-if (searchLessonBtn) {
-  searchLessonBtn.addEventListener("click", async () => {
-    const term = document.getElementById("search-lesson").value.toLowerCase();
-    const snapshot = await getDocs(query(collection(db, "lessons")));
+// ---- Search Lessons ----
+const lessonSearchBtn = document.getElementById("search-lesson-btn");
+if (lessonSearchBtn) {
+  lessonSearchBtn.addEventListener("click", async () => {
+    const term = document.getElementById("search-lesson").value.trim().toLowerCase();
     const list = document.getElementById("lessons-list");
     list.innerHTML = "";
-    snapshot.forEach((docSnap) => {
-      const l = docSnap.data();
+
+    const snapshot = await getDocs(collection(db, "lessons"));
+    snapshot.forEach(docSnap => {
+      const data = docSnap.data();
       if (
-        l.title.toLowerCase().includes(term) ||
-        l.content.toLowerCase().includes(term) ||
-        l.id.toString() === term
+        data.title.toLowerCase().includes(term) ||
+        data.content.toLowerCase().includes(term) ||
+        String(data.id).includes(term)
       ) {
-        list.innerHTML += `<div class="card"><h3>${l.title}</h3><p>${l.content}</p></div>`;
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `<h3>${data.title} (#${data.id})</h3>
+                          <p>${data.content.substring(0, 100)}...</p>`;
+        list.appendChild(card);
       }
     });
   });
 }
 
-// ----- Search Users -----
-const searchUserBtn = document.getElementById("search-user-btn");
-if (searchUserBtn) {
-  searchUserBtn.addEventListener("click", async () => {
-    const term = document.getElementById("search-user").value.toLowerCase();
-    const snapshot = await getDocs(query(collection(db, "users")));
+// ---- Search Users (basic placeholder, role handling can be added later) ----
+const userSearchBtn = document.getElementById("search-user-btn");
+if (userSearchBtn) {
+  userSearchBtn.addEventListener("click", async () => {
+    const term = document.getElementById("search-user").value.trim().toLowerCase();
     const list = document.getElementById("users-list");
     list.innerHTML = "";
-    snapshot.forEach((docSnap) => {
-      const u = docSnap.data();
-      if (u.email.toLowerCase().includes(term) || u.role.toLowerCase().includes(term)) {
-        list.innerHTML += `
-          <div class="card">
-            <h3>${u.email}</h3>
-            <p>Role: ${u.role}</p>
-            <button class="btn" onclick="window.changeRole('${docSnap.id}','admin')">Make Admin</button>
-            <button class="btn" onclick="window.changeRole('${docSnap.id}','user')">Make User</button>
-          </div>`;
+
+    const snapshot = await getDocs(collection(db, "users"));
+    snapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      if (
+        (data.email && data.email.toLowerCase().includes(term)) ||
+        String(data.id).includes(term)
+      ) {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `<h3>${data.email || "Unknown"} (#${data.id || docSnap.id})</h3>
+                          <p>Role: ${data.role || "user"}</p>`;
+        list.appendChild(card);
       }
     });
   });
 }
-
-// ----- Change Role -----
-window.changeRole = async (uid, role) => {
-  try {
-    await updateDoc(doc(db, "users", uid), { role });
-    alert("Role updated to " + role);
-  } catch (err) {
-    console.error(err);
-    alert("Error updating role: " + err.message);
-  }
-};
