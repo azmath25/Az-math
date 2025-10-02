@@ -1,6 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Panel - Az-Math</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script type="module" src="js/main.js" defer></script>
+  <script type="module" src="js/menu.js" defer></script>
+  <script type="module" src="js/admin.js" defer></script>
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="nav-left">
+      <button class="hamburger" id="menu-toggle">☰</button>
+      <span class="site-title">Az-Math</span>
+    </div>
+    <div class="nav-right">
+      <img src="assets/img/defaultprofile.png" class="profile-icon" id="profile-photo" alt="profile">
+    </div>
+  </header>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="problems.html">Problems</a></li>
+      <li><a href="lessons.html">Lessons</a></li>
+    </ul>
+  </nav>
+
+  <div id="menu"></div>
+
+  <main class="content">
+    <h1>Admin Panel</h1>
+
+    <div class="tabs" role="tablist" aria-label="Admin sections">
+      <button data-tab="problems" class="active">Problems</button>
+      <button data-tab="lessons">Lessons</button>
+      <button data-tab="users">Users</button>
+    </div>
+
+    <section id="problems-section" class="section active">
+      <div class="toolbar" style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
+        <button id="add-problem-btn" class="btn">+ Add Problem</button>
+        <input type="text" id="problem-search" placeholder="Search problems..." style="flex:1;padding:8px;border-radius:6px;border:1px solid #ccc">
+        <button id="search-problem-btn" class="btn">Search</button>
+        <button id="export-problems-btn" class="btn" style="background:#666;">Export</button>
+        <input id="import-problems-file" type="file" accept="application/json" style="display:none;">
+        <button id="import-problems-btn" class="btn" style="background:#666;">Import</button>
+      </div>
+      <div id="problems-list" class="card-grid" aria-live="polite"></div>
+    </section>
+
+    <section id="lessons-section" class="section">
+      <div class="toolbar" style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
+        <button id="add-lesson-btn" class="btn">+ Add Lesson</button>
+        <input type="text" id="lesson-search" placeholder="Search lessons..." style="flex:1;padding:8px;border-radius:6px;border:1px solid #ccc">
+        <button id="search-lesson-btn" class="btn">Search</button>
+      </div>
+      <div id="lessons-list" class="card-grid"></div>
+    </section>
+
+    <section id="users-section" class="section">
+      <div class="toolbar" style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
+        <input type="text" id="user-search" placeholder="Search users..." style="flex:1;padding:8px;border-radius:6px;border:1px solid #ccc">
+        <button id="search-user-btn" class="btn">Search</button>
+      </div>
+      <div id="users-list" class="card-grid"></div>
+    </section>
+  </main>
+
+  <!-- Editor Modal -->
+  <div id="editor-modal" class="modal" style="display:none;">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="editor-title">
+      <h2 id="editor-title">Add/Edit Problem</h2>
+      <form id="editor-form" style="display:grid;gap:10px;">
+        <div style="display:flex;gap:10px;">
+          <input type="text" id="problem-title" placeholder="Title" required style="flex:1;padding:8px;border-radius:6px;border:1px solid #ccc;">
+          <input type="text" id="problem-tags" placeholder="Tags (comma separated)" style="width:260px;padding:8px;border-radius:6px;border:1px solid #ccc;">
+        </div>
+
+        <label>Statement (supports basic HTML)</label>
+        <textarea id="problem-statement" required style="min-height:160px;padding:8px;border-radius:6px;border:1px solid #ccc;"></textarea>
+
+        <label>Solution (hidden on problem page by default)</label>
+        <textarea id="problem-solution" style="min-height:120px;padding:8px;border-radius:6px;border:1px solid #ccc;"></textarea>
+
+        <label>Image URLs (one per line)</label>
+        <textarea id="problem-images" placeholder="https://.../img1.png" style="min-height:72px;padding:8px;border-radius:6px;border:1px solid #ccc;"></textarea>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:6px;">
+          <button type="button" id="delete-problem-btn" class="btn" style="background:#c0392b;display:none;">Delete</button>
+          <button type="button" id="close-editor" class="btn" style="background:#777;">Cancel</button>
+          <button type="submit" class="btn">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Panel - Az-Math</title>
