@@ -4,8 +4,6 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 import { getStorage } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-storage.js";
 
-// ===== Firebase Config =====
-// Replace values from Firebase console
 const firebaseConfig = {
   apiKey: "YOUR-API-KEY",
   authDomain: "az-math.firebaseapp.com",
@@ -15,10 +13,7 @@ const firebaseConfig = {
   appId: "1:49046309945:web:a3be9525705860c75191e8"
 };
 
-// ===== Initialize =====
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
-
-console.log("Firebase initialized");
