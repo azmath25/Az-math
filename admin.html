@@ -28,9 +28,12 @@
     </ul>
   </nav>
 
+  <div id="menu"></div>
+
   <main class="content">
     <h1>Admin Panel</h1>
 
+    <!-- Tabs -->
     <div class="tabs">
       <button class="tab-btn active" data-tab="problems">Problems</button>
       <button class="tab-btn" data-tab="lessons">Lessons</button>
@@ -38,16 +41,17 @@
     </div>
 
     <!-- Problems -->
-    <section class="tab-content active" id="tab-problems">
+    <section id="tab-problems" class="tab-content active">
       <h2>Manage Problems</h2>
-      <form id="add-problem-form">
+
+      <form id="add-problem-form" class="form-container">
         <input type="text" id="problem-title" placeholder="Problem Title" required />
         <textarea id="problem-statement" placeholder="Problem Statement" required></textarea>
         <textarea id="problem-solution" placeholder="Solution" required></textarea>
-        <button type="submit" class="btn">Add Problem</button>
+        <button type="submit" class="btn">+ Add Problem</button>
       </form>
 
-      <div class="search-box">
+      <div class="form-container">
         <input type="text" id="search-problem" placeholder="Search problems..." />
         <button id="search-problem-btn" class="btn">Search</button>
       </div>
@@ -55,16 +59,16 @@
     </section>
 
     <!-- Lessons -->
-    <section class="tab-content" id="tab-lessons">
+    <section id="tab-lessons" class="tab-content">
       <h2>Manage Lessons</h2>
-      <form id="add-lesson-form">
+
+      <form id="add-lesson-form" class="form-container">
         <input type="text" id="lesson-title" placeholder="Lesson Title" required />
-        <input type="text" id="lesson-cover" placeholder="Cover Image URL (optional)" />
         <textarea id="lesson-content" placeholder="Lesson Content" required></textarea>
-        <button type="submit" class="btn">Add Lesson</button>
+        <button type="submit" class="btn">+ Add Lesson</button>
       </form>
 
-      <div class="search-box">
+      <div class="form-container">
         <input type="text" id="search-lesson" placeholder="Search lessons..." />
         <button id="search-lesson-btn" class="btn">Search</button>
       </div>
@@ -72,9 +76,9 @@
     </section>
 
     <!-- Users -->
-    <section class="tab-content" id="tab-users">
+    <section id="tab-users" class="tab-content">
       <h2>Manage Users</h2>
-      <div class="search-box">
+      <div class="form-container">
         <input type="text" id="search-user" placeholder="Search users..." />
         <button id="search-user-btn" class="btn">Search</button>
       </div>
