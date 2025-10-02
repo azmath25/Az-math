@@ -5,12 +5,12 @@ import { getFirestore } from "https://www.gstatic.com/firebasejs/12.3.0/firebase
 import { getStorage } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-storage.js";
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
+  apiKey: "AIzaSyCYrw8aLDGtbKXdou7YweLVBKLFXHyl9SM",
   authDomain: "az-math.firebaseapp.com",
   projectId: "az-math",
-  storageBucket: "az-math.appspot.com",
+  storageBucket: "az-math.firebasestorage.app",
   messagingSenderId: "49046309945",
-  appId: "1:49046309945:web:646fcf1f1423e0735191e8"
+  appId: "1:49046309945:web:a3be9525705860c75191e8"
 };
 
 export const app = initializeApp(firebaseConfig);
