@@ -1,19 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Az-Math</title>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css" />
+  <script defer src="js/auth.js"></script>
 </head>
 <body>
-  <div id="menu"></div>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="nav-left">
+      <button class="hamburger" id="menu-toggle">☰</button>
+      <span class="site-title">Az-Math</span>
+    </div>
+    <div class="nav-right">
+      <img src="assets/img/defaultprofile.png" alt="Profile" class="profile-icon" id="profile-photo">
+    </div>
+  </header>
 
-  <main class="container">
+  <!-- Sidebar Menu -->
+  <nav class="sidebar" id="sidebar">
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="problems.html">Problems</a></li>
+      <li><a href="lessons.html">Lessons</a></li>
+      <li><a href="admin.html">Admin</a></li>
+      <li><a href="login.html">Login</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero Section -->
+  <main class="hero">
     <h1>Welcome to Az-Math</h1>
-    <p>Explore math problems, lessons, and solutions.</p>
+    <p>Your hub for math problems, lessons, and preparation.</p>
+    <div class="hero-buttons">
+      <a href="problems.html" class="btn">Explore Problems</a>
+      <a href="lessons.html" class="btn">View Lessons</a>
+    </div>
   </main>
 
-  <script type="module" src="js/menu.js"></script>
+  <script>
+    // Sidebar toggle
+    document.getElementById('menu-toggle').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('open');
+    });
+  </script>
 </body>
 </html>
+
