@@ -1,4 +1,4 @@
-/* ===== Global Reset ===== */
+/* ===== Reset ===== */
 * {
   margin: 0;
   padding: 0;
@@ -7,82 +7,88 @@
 
 body {
   font-family: system-ui, sans-serif;
-  background-color: #f9f9f9;
+  background-color: #f5f5f5;  /* soft grey background */
   color: #111;
   line-height: 1.6;
 }
 
-/* ===== Header ===== */
-.header {
+/* ===== Navbar / Header ===== */
+.navbar, .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   background: #fff;
   padding: 0.8rem 1.2rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #ddd;
   position: sticky;
   top: 0;
   z-index: 100;
 }
 
-.logo {
+.site-title, .logo {
   font-weight: bold;
   font-size: 1.2rem;
 }
 
-.menu {
-  position: relative;
-}
-
-.menu-toggle {
-  display: none;
+.hamburger, .menu-toggle {
   font-size: 1.5rem;
   background: none;
   border: none;
   cursor: pointer;
 }
 
-.menu-links {
-  display: flex;
-  gap: 1rem;
-  list-style: none;
+/* ===== Sidebar ===== */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: -220px;
+  width: 220px;
+  height: 100%;
+  background: #fff;
+  border-right: 1px solid #ddd;
+  padding-top: 4rem;
+  transition: left 0.3s ease;
+  z-index: 200;
 }
-
-.menu-links a {
+.sidebar.open {
+  left: 0;
+}
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+.sidebar li {
+  margin: 1rem 0;
+}
+.sidebar a {
   text-decoration: none;
   color: #111;
-  font-weight: 500;
+  padding: 0.5rem 1rem;
+  display: block;
+}
+.sidebar a:hover {
+  background: #f0f0f0;
 }
 
-.menu-links a:hover {
-  color: #2563eb; /* Blue hover */
+/* ===== Dynamic Menu (injected by JS) ===== */
+.menu {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.8rem 1rem;
+}
+.menu button {
+  background: none;
+  border: none;
+  color: #111;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.menu button:hover {
+  color: #2563eb; /* blue hover */
 }
 
-/* Mobile menu */
-@media (max-width: 768px) {
-  .menu-toggle {
-    display: block;
-  }
-
-  .menu-links {
-    display: none;
-    position: absolute;
-    right: 0;
-    top: 3rem;
-    flex-direction: column;
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 0.5rem 1rem;
-  }
-
-  .menu-links.show {
-    display: flex;
-  }
-}
-
-/* ===== Profile ===== */
-.profile img {
+/* ===== Profile Icon ===== */
+.profile-icon, .profile img {
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -93,7 +99,7 @@ body {
 
 /* ===== Main Content ===== */
 .content {
-  max-width: 800px;
+  max-width: 900px;
   margin: 2rem auto;
   padding: 0 1rem;
 }
@@ -103,7 +109,55 @@ body {
   font-weight: bold;
 }
 
-.lesson-content {
+/* ===== Hero Section ===== */
+.hero {
+  text-align: center;
+  padding: 4rem 1rem;
+}
+.hero h1 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+.hero p {
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+.hero-buttons .btn {
+  margin: 0.5rem;
+}
+
+/* ===== Cards (Problems, Lessons) ===== */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  transition: transform 0.1s;
+}
+.card:hover {
+  transform: translateY(-2px);
+}
+.card h3 {
+  margin-top: 0;
+  font-size: 1.2rem;
+}
+.card p {
+  font-size: 0.9rem;
+  color: #444;
+}
+.card button {
+  margin-top: 0.5rem;
+}
+
+/* ===== Problem & Lesson Content ===== */
+.lesson-content, .problem-statement, #solution-container {
   background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
@@ -117,12 +171,10 @@ body {
   margin-top: 1rem;
 }
 
-/* ===== Problems List ===== */
 .problem-list {
   list-style: none;
   padding-left: 0;
 }
-
 .problem-list li {
   background: #fff;
   border: 1px solid #e5e7eb;
@@ -131,13 +183,60 @@ body {
   padding: 0.8rem;
   transition: background 0.2s;
 }
-
 .problem-list li:hover {
   background: #f3f4f6;
 }
-
 .problem-list a {
   text-decoration: none;
   color: #111;
   font-weight: 500;
+}
+
+/* ===== Forms (Login, Admin, Profile) ===== */
+.form-container, form {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1.5rem;
+  max-width: 400px;
+  margin: 2rem auto;
+}
+form label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-weight: 500;
+}
+form input, form textarea {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+form textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* ===== Buttons ===== */
+.btn {
+  background: #111;
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+.btn:hover {
+  background: #333;
+}
+
+/* ===== Pagination ===== */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
 }
