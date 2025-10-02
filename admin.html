@@ -41,40 +41,96 @@
 
     <!-- Problems -->
     <section class="tab-content active" id="tab-problems">
-      <h2>Manage Problems</h2>
-      <div class="form-container">
-        <form id="add-problem-form">
-          <input type="text" id="problem-title" placeholder="Problem Title" required />
-          <textarea id="problem-statement" placeholder="Problem Statement" required></textarea>
-          <textarea id="problem-solution" placeholder="Solution" required></textarea>
-          <button type="submit" class="btn">Add Problem</button>
-        </form>
+
+      <!-- Overview Mode -->
+      <div id="problems-overview">
+        <h2>Manage Problems</h2>
+        <button id="add-problem-btn" class="btn">➕ Add Problem</button>
+        <input type="text" id="search-problem" placeholder="Search problems by ID, title, or statement..." />
+        <button id="search-problem-btn">🔍 Search</button>
+        <div id="problems-list" class="card-grid"></div>
       </div>
 
-      <input type="text" id="search-problem" placeholder="Search problems..." />
-      <div id="problems-list" class="card-grid"></div>
+      <!-- Editor Mode -->
+      <div id="problem-editor" class="hidden">
+        <div class="editor-header">
+          <h2>Edit Problem</h2>
+          <button id="preview-problem-btn" class="btn">👁 Preview</button>
+        </div>
+        <input type="text" id="problem-title" placeholder="Problem Title" />
+
+        <div class="editor-section">
+          <h3>Statement</h3>
+          <button id="add-statement-btn">➕ Add Statement</button>
+          <div id="statement-blocks"></div>
+        </div>
+
+        <div class="editor-section">
+          <h3>Solutions</h3>
+          <button id="add-solution-btn">➕ Add Solution</button>
+          <div id="solution-blocks"></div>
+        </div>
+      </div>
+
+      <!-- Preview Mode -->
+      <div id="problem-preview" class="hidden">
+        <div class="preview-header">
+          <button id="back-to-editor-problem" class="btn">⬅ Back to Edit</button>
+          <button id="save-problem-btn" class="btn">💾 Save</button>
+        </div>
+        <div id="problem-render"></div>
+      </div>
     </section>
 
     <!-- Lessons -->
     <section class="tab-content" id="tab-lessons">
-      <h2>Manage Lessons</h2>
-      <div class="form-container">
-        <form id="add-lesson-form">
-          <input type="text" id="lesson-title" placeholder="Lesson Title" required />
-          <input type="text" id="lesson-cover" placeholder="Cover Image URL (optional)" />
-          <textarea id="lesson-content" placeholder="Lesson Content" required></textarea>
-          <button type="submit" class="btn">Add Lesson</button>
-        </form>
+
+      <!-- Overview Mode -->
+      <div id="lessons-overview">
+        <h2>Manage Lessons</h2>
+        <button id="add-lesson-btn" class="btn">➕ Add Lesson</button>
+        <input type="text" id="search-lesson" placeholder="Search lessons by ID or title..." />
+        <button id="search-lesson-btn">🔍 Search</button>
+        <div id="lessons-list" class="card-grid"></div>
       </div>
 
-      <input type="text" id="search-lesson" placeholder="Search lessons..." />
-      <div id="lessons-list" class="card-grid"></div>
+      <!-- Editor Mode -->
+      <div id="lesson-editor" class="hidden">
+        <div class="editor-header">
+          <h2>Edit Lesson</h2>
+          <button id="preview-lesson-btn" class="btn">👁 Preview</button>
+        </div>
+        <input type="text" id="lesson-title" placeholder="Lesson Title" />
+        <input type="text" id="lesson-cover" placeholder="Cover Image URL (optional)" />
+
+        <div class="editor-section">
+          <h3>Statement</h3>
+          <button id="add-lesson-statement-btn">➕ Add Statement</button>
+          <div id="lesson-statement-blocks"></div>
+        </div>
+
+        <div class="editor-section">
+          <h3>Problems</h3>
+          <button id="add-lesson-problem-btn">➕ Add Problem Block</button>
+          <div id="lesson-problem-blocks"></div>
+        </div>
+      </div>
+
+      <!-- Preview Mode -->
+      <div id="lesson-preview" class="hidden">
+        <div class="preview-header">
+          <button id="back-to-editor-lesson" class="btn">⬅ Back to Edit</button>
+          <button id="save-lesson-btn" class="btn">💾 Save</button>
+        </div>
+        <div id="lesson-render"></div>
+      </div>
     </section>
 
     <!-- Users -->
     <section class="tab-content" id="tab-users">
       <h2>Manage Users</h2>
-      <input type="text" id="search-user" placeholder="Search users..." />
+      <input type="text" id="search-user" placeholder="Search users by email..." />
+      <button id="search-user-btn">🔍 Search</button>
       <div id="users-list" class="card-grid"></div>
     </section>
   </main>
