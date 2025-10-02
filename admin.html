@@ -8,11 +8,6 @@
   <script type="module" src="js/main.js" defer></script>
   <script type="module" src="js/menu.js" defer></script>
   <script type="module" src="js/admin.js" defer></script>
-  <style>
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-    .tab-btn.active { font-weight: bold; border-bottom: 2px solid #333; }
-  </style>
 </head>
 <body>
   <header class="navbar">
@@ -33,9 +28,12 @@
     </ul>
   </nav>
 
+  <div id="menu"></div>
+
   <main class="content">
     <h1>Admin Panel</h1>
 
+    <!-- Tabs -->
     <div class="tabs">
       <button class="tab-btn active" data-tab="problems">Problems</button>
       <button class="tab-btn" data-tab="lessons">Lessons</button>
@@ -43,35 +41,55 @@
     </div>
 
     <!-- Problems -->
-    <section class="tab-content active" id="tab-problems">
+    <section id="tab-problems" class="tab-content active">
       <h2>Manage Problems</h2>
-      <form id="add-problem-form">
-        <input type="text" id="problem-title" placeholder="Problem Title" required />
-        <textarea id="problem-statement" placeholder="Problem Statement" required></textarea>
-        <textarea id="problem-solution" placeholder="Solution" required></textarea>
-        <button type="submit" class="btn">Add Problem</button>
-      </form>
-      <input type="text" id="search-problem" placeholder="Search problems..." />
+      <button id="btn-add-problem" class="btn">+ Add Problem</button>
+
+      <div class="form-container hidden" id="add-problem-container">
+        <form id="add-problem-form">
+          <input type="text" id="problem-title" placeholder="Problem Title" required />
+          <textarea id="problem-statement" placeholder="Problem Statement" required></textarea>
+          <textarea id="problem-solution" placeholder="Solution" required></textarea>
+          <button type="submit" class="btn">Save Problem</button>
+        </form>
+      </div>
+
+      <div class="search-bar">
+        <input type="text" id="search-problem" placeholder="Search problems..." />
+        <button id="btn-search-problem" class="btn">Search</button>
+      </div>
+
       <div id="problems-list" class="card-grid"></div>
     </section>
 
     <!-- Lessons -->
-    <section class="tab-content" id="tab-lessons">
+    <section id="tab-lessons" class="tab-content">
       <h2>Manage Lessons</h2>
-      <form id="add-lesson-form">
-        <input type="text" id="lesson-title" placeholder="Lesson Title" required />
-        <input type="text" id="lesson-cover" placeholder="Cover Image URL (optional)" />
-        <textarea id="lesson-content" placeholder="Lesson Content" required></textarea>
-        <button type="submit" class="btn">Add Lesson</button>
-      </form>
-      <input type="text" id="search-lesson" placeholder="Search lessons..." />
+      <button id="btn-add-lesson" class="btn">+ Add Lesson</button>
+
+      <div class="form-container hidden" id="add-lesson-container">
+        <form id="add-lesson-form">
+          <input type="text" id="lesson-title" placeholder="Lesson Title" required />
+          <textarea id="lesson-content" placeholder="Lesson Content" required></textarea>
+          <button type="submit" class="btn">Save Lesson</button>
+        </form>
+      </div>
+
+      <div class="search-bar">
+        <input type="text" id="search-lesson" placeholder="Search lessons..." />
+        <button id="btn-search-lesson" class="btn">Search</button>
+      </div>
+
       <div id="lessons-list" class="card-grid"></div>
     </section>
 
     <!-- Users -->
-    <section class="tab-content" id="tab-users">
+    <section id="tab-users" class="tab-content">
       <h2>Manage Users</h2>
-      <input type="text" id="search-user" placeholder="Search users..." />
+      <div class="search-bar">
+        <input type="text" id="search-user" placeholder="Search users..." />
+        <button id="btn-search-user" class="btn">Search</button>
+      </div>
       <div id="users-list" class="card-grid"></div>
     </section>
   </main>
