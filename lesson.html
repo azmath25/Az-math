@@ -1,37 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lesson</title>
-  <link rel="stylesheet" href="styles.css">
-  <script type="module" src="js/lesson.js" defer></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lessons - Az-Math</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script type="module" src="js/main.js" defer></script>
+  <script type="module" src="js/menu.js" defer></script>
+  <script type="module" src="js/lessons.js" defer></script>
 </head>
 <body>
-  <!-- Header -->
-  <header class="header">
-    <div class="logo">Az-Math</div>
-    <nav class="menu">
-      <button class="menu-toggle">☰</button>
-      <ul class="menu-links">
-        <li><a href="index.html">Home</a></li>
-        <li><a href="problems.html">Problems</a></li>
-        <li><a href="lessons.html">Lessons</a></li>
-        <li><a href="admin.html">Admin</a></li>
-      </ul>
-    </nav>
-    <div class="profile">
-      <img id="profile-img" src="assets/defaultprofile.png" alt="Profile">
+  <header class="navbar">
+    <div class="nav-left">
+      <button class="hamburger" id="menu-toggle">☰</button>
+      <span class="site-title">Az-Math</span>
+    </div>
+    <div class="nav-right">
+      <img src="assets/img/defaultprofile.png" class="profile-icon" id="profile-photo">
     </div>
   </header>
 
-  <!-- Main -->
-  <main class="content">
-    <h1 id="lesson-title">Lesson Title</h1>
-    <div id="lesson-content" class="lesson-content"></div>
+  <nav class="sidebar" id="sidebar">
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="problems.html">Problems</a></li>
+    </ul>
+  </nav>
 
-    <h2>Related Problems</h2>
-    <ul id="lesson-problems" class="problem-list"></ul>
+  <div id="menu"></div>
+
+  <main class="content">
+    <h1>Lessons</h1>
+    <div id="lessons-list" class="card-grid"></div>
   </main>
 </body>
 </html>
