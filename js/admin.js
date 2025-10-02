@@ -1,65 +1,162 @@
-import { db, auth } from "./firebase.js";
+// js/admin.js
+import { db } from "./firebase.js";
 import { protectAdminPage } from "./auth.js";
-import { 
-  collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc 
+import {
+  collection,
+  doc,
+  getDoc,
+  runTransaction,
+  setDoc,
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
 // Protect page
 protectAdminPage();
 
-// ===== COUNTER HELPER =====
-async function getNextNumber(type) {
-  const counterRef = doc(db, "meta", "counters");
-  const snap = await getDoc(counterRef);
+/**
+ * Get the next numeric ID for either "problems" or "lessons"
+ */
+async function getNextId(kind) {
+  const countersRef = doc(db, "counters", "main"); // one doc holding both
+  let newId = null;
 
-  let last = 0;
-  if (snap.exists()) {
-    last = snap.data()[type] || 0;
+  await runTransaction(db, async (transaction) => {
+    const snap = await transaction.get(countersRef);
+    if (!snap.exists()) {
+      throw new Error("Counters document does not exist!");
+    }
+
+    const data = snap.data();
+    const current = data[kind] ?? 0;
+    newId = current + 1;
+    transaction.update(countersRef, { [kind]: newId });
+  });
+
+  return newId;
+}
+
+/**
+ * Save a problem or lesson into Firestore with numeric ID
+ */
+export async function saveToFirestore(kind, data) {
+  const newId = await getNextId(kind);
+  data.id = newId;
+
+  const ref = doc(db, kind, String(newId)); // store as numeric string
+  await setDoc(ref, data);
+
+  return newId;
+}
+
+// --- Problem Editor logic (sketch) ---
+const problemEditor = document.getElementById("problem-editor");
+const addStatementBtn = document.getElementById("add-statement-btn");
+const addSolutionBtn = document.getElementById("add-solution-btn");
+const previewProblemBtn = document.getElementById("preview-problem-btn");
+
+function createBlock(type, value = "") {
+  const block = document.createElement("div");
+  block.className = "editor-block";
+
+  if (type === "text") {
+    const textarea = document.createElement("textarea");
+    textarea.value = value;
+    textarea.placeholder = "Enter text...";
+    block.appendChild(textarea);
+  } else if (type === "image") {
+    const input = document.createElement("input");
+    input.type = "text";
+    input.value = value;
+    input.placeholder = "Enter image URL...";
+    block.appendChild(input);
   }
-  const next = last + 1;
 
-  await updateDoc(counterRef, { [type]: next });
-  return next;
+  const delBtn = document.createElement("button");
+  delBtn.textContent = "✖";
+  delBtn.className = "delete-btn";
+  delBtn.onclick = () => block.remove();
+
+  block.appendChild(delBtn);
+  return block;
 }
 
-// ===== Problems =====
-const problemsRef = collection(db, "problems");
-const problemForm = document.getElementById("add-problem-form");
-if (problemForm) {
-  problemForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
+// Add Statement
+if (addStatementBtn) {
+  addStatementBtn.onclick = () => {
+    if (!document.querySelector("#statement-section")) {
+      const section = document.createElement("div");
+      section.id = "statement-section";
+      section.innerHTML = `<h3>Statement</h3>`;
+      const addText = document.createElement("button");
+      addText.textContent = "Add Text Block";
+      addText.onclick = () => section.appendChild(createBlock("text"));
+
+      const addImage = document.createElement("button");
+      addImage.textContent = "Add Image Block";
+      addImage.onclick = () => section.appendChild(createBlock("image"));
+
+      section.appendChild(addText);
+      section.appendChild(addImage);
+      problemEditor.appendChild(section);
+    }
+  };
+}
+
+// Add Solution
+if (addSolutionBtn) {
+  addSolutionBtn.onclick = () => {
+    const section = document.createElement("div");
+    section.className = "solution-section";
+    section.innerHTML = `<h3>Solution</h3>`;
+    const addText = document.createElement("button");
+    addText.textContent = "Add Text Block";
+    addText.onclick = () => section.appendChild(createBlock("text"));
+
+    const addImage = document.createElement("button");
+    addImage.textContent = "Add Image Block";
+    addImage.onclick = () => section.appendChild(createBlock("image"));
+
+    section.appendChild(addText);
+    section.appendChild(addImage);
+    problemEditor.appendChild(section);
+  };
+}
+
+// Preview Problem
+if (previewProblemBtn) {
+  previewProblemBtn.onclick = async () => {
     const title = document.getElementById("problem-title").value;
-    const statement = document.getElementById("problem-statement").value;
-    const solution = document.getElementById("problem-solution").value;
+    const statementBlocks = [];
+    const solutionBlocks = [];
 
-    try {
-      const number = await getNextNumber("problems");
-      await addDoc(problemsRef, { number, title, statement, solution, lessons: [] });
-      alert(`Problem #${number} added!`);
-      problemForm.reset();
-    } catch (err) {
-      alert("Error adding problem: " + err.message);
+    // collect statement
+    const statementSection = document.getElementById("statement-section");
+    if (statementSection) {
+      statementSection.querySelectorAll(".editor-block").forEach((b) => {
+        const input = b.querySelector("textarea, input");
+        statementBlocks.push({ type: input.tagName === "TEXTAREA" ? "text" : "image", value: input.value });
+      });
     }
-  });
-}
 
-// ===== Lessons =====
-const lessonsRef = collection(db, "lessons");
-const lessonForm = document.getElementById("add-lesson-form");
-if (lessonForm) {
-  lessonForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const title = document.getElementById("lesson-title").value;
-    const cover = document.getElementById("lesson-cover").value || "";
-    const content = document.getElementById("lesson-content").value;
+    // collect solutions
+    document.querySelectorAll(".solution-section").forEach((sec) => {
+      const blocks = [];
+      sec.querySelectorAll(".editor-block").forEach((b) => {
+        const input = b.querySelector("textarea, input");
+        blocks.push({ type: input.tagName === "TEXTAREA" ? "text" : "image", value: input.value });
+      });
+      solutionBlocks.push(blocks);
+    });
 
-    try {
-      const number = await getNextNumber("lessons");
-      await addDoc(lessonsRef, { number, title, cover, content, problems: [] });
-      alert(`Lesson #${number} added!`);
-      lessonForm.reset();
-    } catch (err) {
-      alert("Error adding lesson: " + err.message);
-    }
-  });
+    const draft = {
+      title,
+      statement: statementBlocks,
+      solutions: solutionBlocks,
+    };
+
+    // Save draft to localStorage
+    localStorage.setItem("preview-problem", JSON.stringify(draft));
+
+    // Open problem.html in preview mode
+    window.open(`problem.html?preview=true`, "_blank");
+  };
 }
