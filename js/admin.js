@@ -3,45 +3,14 @@ import { db } from "./firebase.js";
 import { protectAdminPage } from "./auth.js";
 import {
   collection,
-  setDoc,
-  getDoc,
+  addDoc,
   getDocs,
-  doc,
-  query,
-  where
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
+// 🔒 Protect page
 protectAdminPage();
 
-// ---- Tab Switching ----
-const tabButtons = document.querySelectorAll(".tab-btn");
-const tabContents = document.querySelectorAll(".tab-content");
-
-tabButtons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    tabButtons.forEach(b => b.classList.remove("active"));
-    tabContents.forEach(c => c.classList.remove("active"));
-
-    btn.classList.add("active");
-    const tabId = "tab-" + btn.dataset.tab;
-    const content = document.getElementById(tabId);
-    if (content) content.classList.add("active");
-  });
-});
-
-// ---- ID generator (meta collection) ----
-async function getNextId(type) {
-  const metaRef = doc(db, "meta", type);
-  const snap = await getDoc(metaRef);
-  let nextId = 1;
-  if (snap.exists()) {
-    nextId = (snap.data().lastId || 0) + 1;
-  }
-  await setDoc(metaRef, { lastId: nextId });
-  return nextId;
-}
-
-// ---- Add Problem ----
+/* ------------------- ADD PROBLEM ------------------- */
 const problemForm = document.getElementById("add-problem-form");
 if (problemForm) {
   problemForm.addEventListener("submit", async (e) => {
@@ -51,108 +20,89 @@ if (problemForm) {
     const solution = document.getElementById("problem-solution").value;
 
     try {
-      const id = await getNextId("problems");
-      await setDoc(doc(db, "problems", String(id)), { id, title, statement, solution });
-      alert("Problem added with ID " + id);
+      await addDoc(collection(db, "problems"), { title, statement, solution });
+      alert("✅ Problem added!");
       problemForm.reset();
     } catch (err) {
-      alert("Error adding problem: " + err.message);
+      alert("❌ Error adding problem: " + err.message);
     }
   });
 }
 
-// ---- Add Lesson ----
+/* ------------------- ADD LESSON ------------------- */
 const lessonForm = document.getElementById("add-lesson-form");
 if (lessonForm) {
   lessonForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const title = document.getElementById("lesson-title").value;
     const content = document.getElementById("lesson-content").value;
+    const cover = document.getElementById("lesson-cover").value;
 
     try {
-      const id = await getNextId("lessons");
-      await setDoc(doc(db, "lessons", String(id)), { id, title, content });
-      alert("Lesson added with ID " + id);
+      await addDoc(collection(db, "lessons"), { title, content, cover });
+      alert("✅ Lesson added!");
       lessonForm.reset();
     } catch (err) {
-      alert("Error adding lesson: " + err.message);
+      alert("❌ Error adding lesson: " + err.message);
     }
   });
 }
 
-// ---- Search Problems ----
-const problemSearchBtn = document.getElementById("search-problem-btn");
-if (problemSearchBtn) {
-  problemSearchBtn.addEventListener("click", async () => {
-    const term = document.getElementById("search-problem").value.trim().toLowerCase();
-    const list = document.getElementById("problems-list");
-    list.innerHTML = "";
+/* ------------------- SEARCH HELPERS ------------------- */
+async function searchCollection(colName, query, fields, listId) {
+  const list = document.getElementById(listId);
+  list.innerHTML = "🔎 Searching...";
 
-    const snapshot = await getDocs(collection(db, "problems"));
-    snapshot.forEach(docSnap => {
-      const data = docSnap.data();
-      if (
-        data.title.toLowerCase().includes(term) ||
-        data.statement.toLowerCase().includes(term) ||
-        String(data.id).includes(term)
-      ) {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `<h3>${data.title} (#${data.id})</h3>
-                          <p>${data.statement.substring(0, 100)}...</p>`;
-        list.appendChild(card);
+  const snap = await getDocs(collection(db, colName));
+  const results = [];
+
+  snap.forEach((doc) => {
+    const data = doc.data();
+    const id = doc.id;
+    let match = id.includes(query); // always check ID
+    fields.forEach((f) => {
+      if (data[f] && data[f].toLowerCase().includes(query.toLowerCase())) {
+        match = true;
       }
     });
+    if (match) results.push({ id, ...data });
   });
+
+  if (results.length === 0) {
+    list.innerHTML = "<p>No results found</p>";
+  } else {
+    list.innerHTML = results
+      .map(
+        (r) => `
+      <div class="card">
+        <h3>${r.title || "(no title)"} (#${r.id})</h3>
+        <p>${(r.statement || r.content || "").slice(0, 100)}...</p>
+      </div>
+    `
+      )
+      .join("");
+  }
 }
 
-// ---- Search Lessons ----
-const lessonSearchBtn = document.getElementById("search-lesson-btn");
-if (lessonSearchBtn) {
-  lessonSearchBtn.addEventListener("click", async () => {
-    const term = document.getElementById("search-lesson").value.trim().toLowerCase();
-    const list = document.getElementById("lessons-list");
-    list.innerHTML = "";
-
-    const snapshot = await getDocs(collection(db, "lessons"));
-    snapshot.forEach(docSnap => {
-      const data = docSnap.data();
-      if (
-        data.title.toLowerCase().includes(term) ||
-        data.content.toLowerCase().includes(term) ||
-        String(data.id).includes(term)
-      ) {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `<h3>${data.title} (#${data.id})</h3>
-                          <p>${data.content.substring(0, 100)}...</p>`;
-        list.appendChild(card);
-      }
-    });
+/* ------------------- SEARCH EVENTS ------------------- */
+// Problems
+document
+  .getElementById("search-problem-btn")
+  ?.addEventListener("click", () => {
+    const query = document.getElementById("search-problem").value.trim();
+    if (query) searchCollection("problems", query, ["title", "statement"], "problems-list");
   });
-}
 
-// ---- Search Users (basic placeholder, role handling can be added later) ----
-const userSearchBtn = document.getElementById("search-user-btn");
-if (userSearchBtn) {
-  userSearchBtn.addEventListener("click", async () => {
-    const term = document.getElementById("search-user").value.trim().toLowerCase();
-    const list = document.getElementById("users-list");
-    list.innerHTML = "";
-
-    const snapshot = await getDocs(collection(db, "users"));
-    snapshot.forEach(docSnap => {
-      const data = docSnap.data();
-      if (
-        (data.email && data.email.toLowerCase().includes(term)) ||
-        String(data.id).includes(term)
-      ) {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `<h3>${data.email || "Unknown"} (#${data.id || docSnap.id})</h3>
-                          <p>Role: ${data.role || "user"}</p>`;
-        list.appendChild(card);
-      }
-    });
+// Lessons
+document
+  .getElementById("search-lesson-btn")
+  ?.addEventListener("click", () => {
+    const query = document.getElementById("search-lesson").value.trim();
+    if (query) searchCollection("lessons", query, ["title", "content"], "lessons-list");
   });
-}
+
+// Users
+document.getElementById("search-user-btn")?.addEventListener("click", () => {
+  const query = document.getElementById("search-user").value.trim();
+  if (query) searchCollection("users", query, ["email", "role"], "users-list");
+});
