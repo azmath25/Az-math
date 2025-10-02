@@ -1,23 +1,38 @@
 // js/menu.js
+import { auth } from "./firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+import { getUserRole, logout } from "./auth.js";
+
 const root = document.getElementById("menu");
-root.innerHTML = `
-  <nav class="menu" role="navigation">
-    <div class="menu-left">
-      <button id="hamburger" aria-label="menu">☰</button>
+
+function renderMenu(items) {
+  root.innerHTML = `
+    <nav class="menu">
       <button onclick="location.href='index.html'">Home</button>
-      <button onclick="location.href='problem.html'">Problems</button>
+      <button onclick="location.href='problems.html'">Problems</button>
       <button onclick="location.href='lessons.html'">Lessons</button>
-      <button onclick="location.href='admin.html'">Admin</button>
-    </div>
-    <div class="menu-right">
-      <img id="profileIcon" src="images/profile.png" alt="profile" class="profile-icon" />
-    </div>
-  </nav>
-`;
+      ${items.join("")}
+    </nav>
+  `;
+}
 
-document.getElementById("hamburger").addEventListener("click", () => {
-  // Simple ARIA toggle -- expands/collapses menu links on small screens if you add CSS
-  // For now we just toggle a class on the menu for further styling if needed
-  document.querySelector(".menu").classList.toggle("open");
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    renderMenu([`<button onclick="location.href='login.html'">Login</button>`]);
+    return;
+  }
+
+  const role = await getUserRole(user.uid);
+
+  if (role === "admin") {
+    renderMenu([
+      `<button onclick="location.href='profile.html'">(Admin) Profile</button>`,
+      `<button onclick="import('./auth.js').then(m=>m.logout())">Logout</button>`
+    ]);
+  } else {
+    renderMenu([
+      `<button onclick="location.href='profile.html'">(User) Profile</button>`,
+      `<button onclick="import('./auth.js').then(m=>m.logout())">Logout</button>`
+    ]);
+  }
 });
-
