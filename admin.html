@@ -1,23 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin - Az-Math</title>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css" />
+  <script defer src="js/firebase.js"></script>
+  <script defer src="js/auth.js"></script>
+  <script defer src="js/admin.js"></script>
 </head>
 <body>
-  <div id="menu"></div>
-
-  <main class="container">
-    <h2>Admin Panel</h2>
-    <div class="admin-actions">
-      <button class="action-btn">Add Problem</button>
-      <button class="action-btn">Add Lesson</button>
-      <button class="action-btn">Manage Users</button>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="nav-left">
+      <button class="hamburger" id="menu-toggle">☰</button>
+      <span class="site-title">Az-Math</span>
     </div>
+    <div class="nav-right">
+      <img src="assets/img/defaultprofile.png" alt="Profile" class="profile-icon" id="profile-photo">
+    </div>
+  </header>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="problems.html">Problems</a></li>
+      <li><a href="lessons.html">Lessons</a></li>
+    </ul>
+  </nav>
+
+  <!-- Admin Panel -->
+  <main class="content">
+    <h1>Admin Panel</h1>
+
+    <section>
+      <h2>Add Problem</h2>
+      <form id="add-problem-form">
+        <input type="text" id="problem-title" placeholder="Problem Title" required />
+        <textarea id="problem-statement" placeholder="Problem Statement" required></textarea>
+        <button type="submit" class="btn admin-btn">Add Problem</button>
+      </form>
+    </section>
+
+    <section>
+      <h2>Add Lesson</h2>
+      <form id="add-lesson-form">
+        <input type="text" id="lesson-title" placeholder="Lesson Title" required />
+        <textarea id="lesson-content" placeholder="Lesson Content" required></textarea>
+        <button type="submit" class="btn admin-btn">Add Lesson</button>
+      </form>
+    </section>
   </main>
 
-  <script type="module" src="js/menu.js"></script>
+  <script src="js/menu.js"></script>
 </body>
 </html>
