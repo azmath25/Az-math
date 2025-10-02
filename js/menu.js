@@ -21,10 +21,19 @@ onAuthStateChanged(auth, async (user) => {
     renderMenu([`<button onclick="location.href='login.html'">Login</button>`]);
     return;
   }
+
   const role = await getUserRole(user.uid);
   const profileLabel = role === "admin" ? "(Admin) Profile" : "(User) Profile";
-  renderMenu([
+
+  let items = [
     `<button onclick="location.href='profile.html'">${profileLabel}</button>`,
     `<button onclick="import('./auth.js').then(m=>m.logout())">Logout</button>`
-  ]);
+  ];
+
+  if (role === "admin") {
+    // Add Admin link if the user is admin
+    items.splice(1, 0, `<button onclick="location.href='admin.html'">Admin</button>`);
+  }
+
+  renderMenu(items);
 });
