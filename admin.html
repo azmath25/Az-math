@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Admin Panel - Az-Math</title>
   <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+
   <script type="module" src="js/main.js" defer></script>
   <script type="module" src="js/menu.js" defer></script>
   <script type="module" src="js/admin.js" defer></script>
 </head>
 <body>
-  <!-- Navbar -->
   <header class="navbar">
     <div class="nav-left">
       <button class="hamburger" id="menu-toggle">☰</button>
@@ -21,7 +22,6 @@
     </div>
   </header>
 
-  <!-- Sidebar -->
   <nav class="sidebar" id="sidebar">
     <ul>
       <li><a href="index.html">Home</a></li>
@@ -35,7 +35,7 @@
   <main class="content">
     <h1>Admin Panel</h1>
 
-    <div class="tabs" role="tablist" aria-label="Admin sections">
+    <div class="tabs" role="tablist" aria-label="Admin sections" style="margin-bottom:12px;">
       <button data-tab="problems" class="active">Problems</button>
       <button data-tab="lessons">Lessons</button>
       <button data-tab="users">Users</button>
@@ -46,10 +46,11 @@
         <button id="add-problem-btn" class="btn">+ Add Problem</button>
         <input type="text" id="problem-search" placeholder="Search problems..." style="flex:1;padding:8px;border-radius:6px;border:1px solid #ccc">
         <button id="search-problem-btn" class="btn">Search</button>
-        <button id="export-problems-btn" class="btn" style="background:#666;">Export</button>
+        <button id="export-problems-btn" class="btn" style="background:#2563eb;">Export</button>
         <input id="import-problems-file" type="file" accept="application/json" style="display:none;">
-        <button id="import-problems-btn" class="btn" style="background:#666;">Import</button>
+        <button id="import-problems-btn" class="btn" style="background:#777;">Import</button>
       </div>
+
       <div id="problems-list" class="card-grid" aria-live="polite"></div>
     </section>
 
@@ -81,11 +82,11 @@
           <input type="text" id="problem-tags" placeholder="Tags (comma separated)" style="width:260px;padding:8px;border-radius:6px;border:1px solid #ccc;">
         </div>
 
-        <label>Statement (supports basic HTML)</label>
-        <textarea id="problem-statement" required style="min-height:160px;padding:8px;border-radius:6px;border:1px solid #ccc;"></textarea>
+        <label>Statement (MathJax supported: use $$...$$ or \( ... \) )</label>
+        <textarea id="problem-statement" required style="min-height:180px;padding:8px;border-radius:6px;border:1px solid #ccc;"></textarea>
 
         <label>Solution (hidden on problem page by default)</label>
-        <textarea id="problem-solution" style="min-height:120px;padding:8px;border-radius:6px;border:1px solid #ccc;"></textarea>
+        <textarea id="problem-solution" style="min-height:140px;padding:8px;border-radius:6px;border:1px solid #ccc;"></textarea>
 
         <label>Image URLs (one per line)</label>
         <textarea id="problem-images" placeholder="https://.../img1.png" style="min-height:72px;padding:8px;border-radius:6px;border:1px solid #ccc;"></textarea>
@@ -95,99 +96,6 @@
           <button type="button" id="close-editor" class="btn" style="background:#777;">Cancel</button>
           <button type="submit" class="btn">Save</button>
         </div>
-      </form>
-    </div>
-  </div>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Panel - Az-Math</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <script type="module" src="js/main.js" defer></script>
-  <script type="module" src="js/menu.js" defer></script>
-  <script type="module" src="js/admin.js" defer></script>
-</head>
-<body>
-  <!-- Navbar -->
-  <header class="navbar">
-    <div class="nav-left">
-      <button class="hamburger" id="menu-toggle">☰</button>
-      <span class="site-title">Az-Math</span>
-    </div>
-    <div class="nav-right">
-      <img src="assets/img/defaultprofile.png" class="profile-icon" id="profile-photo">
-    </div>
-  </header>
-
-  <!-- Sidebar -->
-  <nav class="sidebar" id="sidebar">
-    <ul>
-      <li><a href="index.html">Home</a></li>
-      <li><a href="problems.html">Problems</a></li>
-      <li><a href="lessons.html">Lessons</a></li>
-    </ul>
-  </nav>
-
-  <!-- Dynamic Menu -->
-  <div id="menu"></div>
-
-  <!-- Admin Content -->
-  <main class="content">
-    <h1>Admin Panel</h1>
-
-    <div class="tabs">
-      <button data-tab="problems" class="active">Problems</button>
-      <button data-tab="lessons">Lessons</button>
-      <button data-tab="users">Users</button>
-    </div>
-
-    <!-- Problems Section -->
-    <section id="problems-section" class="section active">
-      <div class="toolbar">
-        <button id="add-problem-btn" class="btn">+ Add Problem</button>
-        <input type="text" id="problem-search" placeholder="Search problems..." />
-        <button id="search-problem-btn" class="btn">Search</button>
-      </div>
-      <div id="problems-list" class="card-grid"></div>
-    </section>
-
-    <!-- Lessons Section -->
-    <section id="lessons-section" class="section">
-      <div class="toolbar">
-        <button id="add-lesson-btn" class="btn">+ Add Lesson</button>
-        <input type="text" id="lesson-search" placeholder="Search lessons..." />
-        <button id="search-lesson-btn" class="btn">Search</button>
-      </div>
-      <div id="lessons-list" class="card-grid"></div>
-    </section>
-
-    <!-- Users Section -->
-    <section id="users-section" class="section">
-      <div class="toolbar">
-        <input type="text" id="user-search" placeholder="Search users..." />
-        <button id="search-user-btn" class="btn">Search</button>
-      </div>
-      <div id="users-list" class="card-grid"></div>
-    </section>
-  </main>
-
-  <!-- Modal Editor -->
-  <div id="editor-modal" class="modal" style="display:none;">
-    <div class="modal-content">
-      <h2 id="editor-title">Add/Edit Problem</h2>
-      <form id="editor-form">
-        <label>Title</label>
-        <input type="text" id="problem-title" required />
-        <label>Statement</label>
-        <textarea id="problem-statement" required></textarea>
-        <label>Solution</label>
-        <textarea id="problem-solution"></textarea>
-        <button type="submit" class="btn">Save</button>
-        <button type="button" id="close-editor" class="btn">Cancel</button>
       </form>
     </div>
   </div>
