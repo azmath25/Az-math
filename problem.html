@@ -5,19 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Problem - Az-Math</title>
   <link rel="stylesheet" href="css/style.css" />
-  <script defer src="js/firebase.js"></script>
-  <script defer src="js/problem.js"></script>
+  <script type="module" src="js/main.js" defer></script>
+  <script type="module" src="js/menu.js" defer></script>
+  <script type="module" src="js/problem.js" defer></script>
 </head>
-<script src="js/main.js" defer></script>
 <body>
-  <!-- Navbar -->
+  <!-- Top Navbar -->
   <header class="navbar">
     <div class="nav-left">
       <button class="hamburger" id="menu-toggle">☰</button>
       <span class="site-title">Az-Math</span>
     </div>
     <div class="nav-right">
-      <img src="assets/img/defaultprofile.png" alt="Profile" class="profile-icon" id="profile-photo">
+      <img src="assets/img/defaultprofile.png" class="profile-icon" id="profile-photo">
     </div>
   </header>
 
@@ -30,17 +30,16 @@
     </ul>
   </nav>
 
-  <!-- Problem Section -->
+  <!-- Dynamic Menu -->
+  <div id="menu"></div>
+
+  <!-- Main Content -->
   <main class="content">
-    <h1 id="problem-title">Problem Title</h1>
-    <p id="problem-statement">Loading problem...</p>
+    <h1 id="problem-title">Loading problem...</h1>
+    <div id="problem-statement" class="problem-statement">Please wait</div>
 
-    <button id="show-solution" class="btn">Show Solution</button>
-    <div id="solution-container" style="display:none;">
-      <!-- Solutions (text + images) load here -->
-    </div>
+    <button id="show-solution" class="btn" style="display:none;">Show Solution</button>
+    <div id="solution-container" style="display:none;"></div>
   </main>
-
-  <script src="js/menu.js"></script>
 </body>
 </html>
