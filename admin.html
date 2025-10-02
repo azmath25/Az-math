@@ -1,64 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Admin Panel</title>
-  <link rel="stylesheet" href="style.css">
-  <style>
-    body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 20px; }
-    h1 { font-size: 2rem; }
-    .tabs { display: flex; gap: 30px; margin: 20px 0; }
-    .tabs button { background: none; border: none; font-size: 1.2rem; cursor: pointer; }
-    .tabs button.active { font-weight: bold; text-decoration: underline; }
-    .section { display: none; }
-    .section.active { display: block; }
-    .toolbar { margin: 10px 0; }
-    .toolbar input { padding: 5px; }
-    .toolbar button { padding: 5px 10px; margin-left: 5px; }
-    .card-grid { display: grid; gap: 10px; margin-top: 15px; }
-    .card { background: white; padding: 10px; border-radius: 6px; box-shadow: 0 0 4px rgba(0,0,0,0.1); }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel - Az-Math</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script type="module" src="js/main.js" defer></script>
+  <script type="module" src="js/menu.js" defer></script>
+  <script type="module" src="js/admin.js" defer></script>
 </head>
 <body>
-  <h1>Admin Panel</h1>
-  <div class="tabs">
-    <button data-tab="problems" class="active">Problems</button>
-    <button data-tab="lessons">Lessons</button>
-    <button data-tab="users">Users</button>
-  </div>
-
-  <!-- Problems Section -->
-  <div id="problems-section" class="section active">
-    <h2>Manage Problems</h2>
-    <div class="toolbar">
-      <button id="add-problem-btn">+ Add Problem</button>
-      <input type="text" id="problem-search" placeholder="Search problems...">
-      <button id="search-problem-btn">Search</button>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="nav-left">
+      <button class="hamburger" id="menu-toggle">☰</button>
+      <span class="site-title">Az-Math</span>
     </div>
-    <div id="problems-list" class="card-grid"></div>
-  </div>
-
-  <!-- Lessons Section -->
-  <div id="lessons-section" class="section">
-    <h2>Manage Lessons</h2>
-    <div class="toolbar">
-      <button id="add-lesson-btn">+ Add Lesson</button>
-      <input type="text" id="lesson-search" placeholder="Search lessons...">
-      <button id="search-lesson-btn">Search</button>
+    <div class="nav-right">
+      <img src="assets/img/defaultprofile.png" class="profile-icon" id="profile-photo">
     </div>
-    <div id="lessons-list" class="card-grid"></div>
-  </div>
+  </header>
 
-  <!-- Users Section -->
-  <div id="users-section" class="section">
-    <h2>Manage Users</h2>
-    <div class="toolbar">
-      <input type="text" id="user-search" placeholder="Search users...">
-      <button id="search-user-btn">Search</button>
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="problems.html">Problems</a></li>
+      <li><a href="lessons.html">Lessons</a></li>
+    </ul>
+  </nav>
+
+  <!-- Dynamic Menu -->
+  <div id="menu"></div>
+
+  <!-- Admin Content -->
+  <main class="content">
+    <h1>Admin Panel</h1>
+
+    <div class="tabs">
+      <button data-tab="problems" class="active">Problems</button>
+      <button data-tab="lessons">Lessons</button>
+      <button data-tab="users">Users</button>
     </div>
-    <div id="users-list" class="card-grid"></div>
-  </div>
 
-  <script type="module" src="js/admin.js"></script>
+    <!-- Problems Section -->
+    <section id="problems-section" class="section active">
+      <div class="toolbar">
+        <button id="add-problem-btn" class="btn">+ Add Problem</button>
+        <input type="text" id="problem-search" placeholder="Search problems..." />
+        <button id="search-problem-btn" class="btn">Search</button>
+      </div>
+      <div id="problems-list" class="card-grid"></div>
+    </section>
+
+    <!-- Lessons Section -->
+    <section id="lessons-section" class="section">
+      <div class="toolbar">
+        <button id="add-lesson-btn" class="btn">+ Add Lesson</button>
+        <input type="text" id="lesson-search" placeholder="Search lessons..." />
+        <button id="search-lesson-btn" class="btn">Search</button>
+      </div>
+      <div id="lessons-list" class="card-grid"></div>
+    </section>
+
+    <!-- Users Section -->
+    <section id="users-section" class="section">
+      <div class="toolbar">
+        <input type="text" id="user-search" placeholder="Search users..." />
+        <button id="search-user-btn" class="btn">Search</button>
+      </div>
+      <div id="users-list" class="card-grid"></div>
+    </section>
+  </main>
+
+  <!-- Modal Editor -->
+  <div id="editor-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <h2 id="editor-title">Add/Edit Problem</h2>
+      <form id="editor-form">
+        <label>Title</label>
+        <input type="text" id="problem-title" required />
+        <label>Statement</label>
+        <textarea id="problem-statement" required></textarea>
+        <label>Solution</label>
+        <textarea id="problem-solution"></textarea>
+        <button type="submit" class="btn">Save</button>
+        <button type="button" id="close-editor" class="btn">Cancel</button>
+      </form>
+    </div>
+  </div>
 </body>
 </html>
