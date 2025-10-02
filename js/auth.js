@@ -27,7 +27,7 @@ export async function register(email, password) {
   try {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     await setDoc(doc(db, "Users", cred.user.uid), { role: "user" });
-    window.location.href = "index.html";
+    window.location.href = "profile.html";
   } catch (err) {
     alert("Registration failed: " + err.message);
   }
