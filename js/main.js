@@ -1,19 +1,15 @@
-// Handle mobile menu toggle
+// js/main.js
 document.addEventListener("DOMContentLoaded", () => {
-  const toggle = document.querySelector(".menu-toggle");
-  const menuLinks = document.querySelector(".menu-links");
-
-  if (toggle && menuLinks) {
+  const toggle = document.getElementById("menu-toggle");
+  const sidebar = document.getElementById("sidebar");
+  if (toggle && sidebar) {
     toggle.addEventListener("click", () => {
-      menuLinks.classList.toggle("show");
+      sidebar.classList.toggle("open");
     });
   }
 
-  // Default profile photo handling
-  const profileImg = document.getElementById("profile-img");
-  if (profileImg) {
-    profileImg.onerror = () => {
-      profileImg.src = "assets/defaultprofile.png";
-    };
+  const profileImg = document.getElementById("profile-photo");
+  if (profileImg && !profileImg.src) {
+    profileImg.src = "assets/img/defaultprofile.png";
   }
 });
