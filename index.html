@@ -1,18 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Az-Math</title>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <!-- Menu -->
+  <!-- Navigation placeholder -->
   <div id="menu"></div>
 
-  <h1>Welcome to Az-Math</h1>
-  <p>Math problems and solutions platform</p>
+  <main class="container">
+    <h1>Welcome to Az-Math</h1>
+    <p>Math problems, lessons and multi-solution explanations.</p>
 
+    <section id="auth-box" class="card">
+      <h2>Sign in / Register</h2>
+      <input id="email" type="email" placeholder="Email" />
+      <input id="password" type="password" placeholder="Password" />
+      <div class="row">
+        <button id="loginBtn">Login</button>
+        <button id="registerBtn">Register</button>
+        <button id="logoutBtn" style="display:none">Logout</button>
+      </div>
+      <div id="userState"></div>
+    </section>
+  </main>
+
+  <script type="module" src="js/firebase.js"></script>
   <script type="module" src="js/menu.js"></script>
+  <script type="module" src="js/auth.js"></script>
 </body>
 </html>
+
