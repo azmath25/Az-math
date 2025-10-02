@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Profile - Az-Math</title>
+  <title>Problem - Az-Math</title>
   <link rel="stylesheet" href="css/style.css" />
   <script type="module" src="js/main.js" defer></script>
   <script type="module" src="js/menu.js" defer></script>
-  <script type="module" src="js/profile.js" defer></script>
+  <script type="module" src="js/problem.js" defer></script>
 </head>
 <body>
   <header class="navbar">
@@ -31,15 +31,11 @@
   <div id="menu"></div>
 
   <main class="content">
-    <h1>Profile</h1>
-    <p><strong>Email:</strong> <span id="user-email">Loading...</span></p>
-    <p><strong>Role:</strong> <span id="user-role">Loading...</span></p>
+    <h1 id="problem-title">Loading...</h1>
+    <p id="problem-statement">Loading problem...</p>
 
-    <section id="admin-section" style="display:none;">
-      <h2>Admin Controls</h2>
-      <p>You can manage problems and lessons:</p>
-      <a href="admin.html" class="btn">Go to Admin Panel</a>
-    </section>
+    <button id="show-solution" class="btn">Show Solution</button>
+    <div id="solution-container" style="display:none;"></div>
   </main>
 </body>
 </html>
