@@ -10,16 +10,18 @@
   <script type="module" src="js/admin.js" defer></script>
 </head>
 <body>
+  <!-- ====== Navbar ====== -->
   <header class="navbar">
     <div class="nav-left">
       <button class="hamburger" id="menu-toggle">☰</button>
       <span class="site-title">Az-Math</span>
     </div>
     <div class="nav-right">
-      <img src="assets/img/defaultprofile.png" class="profile-icon" id="profile-photo">
+      <img src="assets/img/defaultprofile.png" class="profile-icon" id="profile-photo" />
     </div>
   </header>
 
+  <!-- ====== Sidebar ====== -->
   <nav class="sidebar" id="sidebar">
     <ul>
       <li><a href="index.html">Home</a></li>
@@ -28,11 +30,14 @@
     </ul>
   </nav>
 
+  <!-- ====== Dynamic Menu ====== -->
   <div id="menu"></div>
 
+  <!-- ====== Main ====== -->
   <main class="content">
     <h1>Admin Panel</h1>
 
+    <!-- Tabs -->
     <div class="tabs">
       <button class="tab-btn active" data-tab="problems">Problems</button>
       <button class="tab-btn" data-tab="lessons">Lessons</button>
@@ -41,97 +46,43 @@
 
     <!-- Problems -->
     <section class="tab-content active" id="tab-problems">
-
-      <!-- Overview Mode -->
-      <div id="problems-overview">
+      <div class="admin-card">
         <h2>Manage Problems</h2>
-        <button id="add-problem-btn" class="btn">➕ Add Problem</button>
-        <input type="text" id="search-problem" placeholder="Search problems by ID, title, or statement..." />
-        <button id="search-problem-btn">🔍 Search</button>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <button id="add-problem-btn" class="btn">+ Add Problem</button>
+          <input type="text" id="search-problem" placeholder="Search by ID, title, or statement..." />
+          <button id="search-problem-btn" class="btn">Search</button>
+        </div>
+
         <div id="problems-list" class="card-grid"></div>
-      </div>
-
-      <!-- Editor Mode -->
-      <div id="problem-editor" class="hidden">
-        <div class="editor-header">
-          <h2>Edit Problem</h2>
-          <button id="preview-problem-btn" class="btn">👁 Preview</button>
-        </div>
-        <input type="text" id="problem-title" placeholder="Problem Title" />
-
-        <div class="editor-section">
-          <h3>Statement</h3>
-          <button id="add-statement-btn">➕ Add Statement</button>
-          <div id="statement-blocks"></div>
-        </div>
-
-        <div class="editor-section">
-          <h3>Solutions</h3>
-          <button id="add-solution-btn">➕ Add Solution</button>
-          <div id="solution-blocks"></div>
-        </div>
-      </div>
-
-      <!-- Preview Mode -->
-      <div id="problem-preview" class="hidden">
-        <div class="preview-header">
-          <button id="back-to-editor-problem" class="btn">⬅ Back to Edit</button>
-          <button id="save-problem-btn" class="btn">💾 Save</button>
-        </div>
-        <div id="problem-render"></div>
       </div>
     </section>
 
     <!-- Lessons -->
     <section class="tab-content" id="tab-lessons">
-
-      <!-- Overview Mode -->
-      <div id="lessons-overview">
+      <div class="admin-card">
         <h2>Manage Lessons</h2>
-        <button id="add-lesson-btn" class="btn">➕ Add Lesson</button>
-        <input type="text" id="search-lesson" placeholder="Search lessons by ID or title..." />
-        <button id="search-lesson-btn">🔍 Search</button>
+
+        <div class="toolbar">
+          <button id="add-lesson-btn" class="btn">+ Add Lesson</button>
+          <input type="text" id="search-lesson" placeholder="Search lessons..." />
+          <button id="search-lesson-btn" class="btn">Search</button>
+        </div>
+
         <div id="lessons-list" class="card-grid"></div>
-      </div>
-
-      <!-- Editor Mode -->
-      <div id="lesson-editor" class="hidden">
-        <div class="editor-header">
-          <h2>Edit Lesson</h2>
-          <button id="preview-lesson-btn" class="btn">👁 Preview</button>
-        </div>
-        <input type="text" id="lesson-title" placeholder="Lesson Title" />
-        <input type="text" id="lesson-cover" placeholder="Cover Image URL (optional)" />
-
-        <div class="editor-section">
-          <h3>Statement</h3>
-          <button id="add-lesson-statement-btn">➕ Add Statement</button>
-          <div id="lesson-statement-blocks"></div>
-        </div>
-
-        <div class="editor-section">
-          <h3>Problems</h3>
-          <button id="add-lesson-problem-btn">➕ Add Problem Block</button>
-          <div id="lesson-problem-blocks"></div>
-        </div>
-      </div>
-
-      <!-- Preview Mode -->
-      <div id="lesson-preview" class="hidden">
-        <div class="preview-header">
-          <button id="back-to-editor-lesson" class="btn">⬅ Back to Edit</button>
-          <button id="save-lesson-btn" class="btn">💾 Save</button>
-        </div>
-        <div id="lesson-render"></div>
       </div>
     </section>
 
     <!-- Users -->
     <section class="tab-content" id="tab-users">
-      <h2>Manage Users</h2>
-      <input type="text" id="search-user" placeholder="Search users by email..." />
-      <button id="search-user-btn">🔍 Search</button>
-      <div id="users-list" class="card-grid"></div>
+      <div class="admin-card">
+        <h2>Manage Users</h2>
+        <input type="text" id="search-user" placeholder="Search users..." />
+        <button id="search-user-btn" class="btn">Search</button>
+        <div id="users-list" class="card-grid"></div>
+      </div>
     </section>
   </main>
 </body>
