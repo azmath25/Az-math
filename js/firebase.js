@@ -4,24 +4,21 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 import { getStorage } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-storage.js";
 
-/* ====== REPLACE THIS BLOCK WITH YOUR FIREBASE CONFIG FROM CONSOLE ====== */
+// ===== Firebase Config =====
+// Replace values from Firebase console
 const firebaseConfig = {
-  apiKey: "AIzaSyCYrw8aLDGtbKXdou7YweLVBKLFXHyl9SM",
+  apiKey: "YOUR-API-KEY",
   authDomain: "az-math.firebaseapp.com",
   projectId: "az-math",
-  storageBucket: "az-math.firebasestorage.app",
+  storageBucket: "az-math.appspot.com",   // fixed
   messagingSenderId: "49046309945",
   appId: "1:49046309945:web:a3be9525705860c75191e8"
 };
-/* ===================================================================== */
 
+// ===== Initialize =====
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 
-console.log("Firebase initialized (client)");
-
-
-
-
+console.log("Firebase initialized");
