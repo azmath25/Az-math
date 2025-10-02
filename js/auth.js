@@ -8,14 +8,12 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-// 🔎 Get role of user (admin or user)
 export async function getUserRole(uid) {
   const userDoc = await getDoc(doc(db, "Users", uid));
   if (userDoc.exists()) return userDoc.data().role || "user";
-  return "user"; // default
+  return "user";
 }
 
-// 🔑 Login
 export async function login(email, password) {
   try {
     await signInWithEmailAndPassword(auth, email, password);
@@ -25,7 +23,6 @@ export async function login(email, password) {
   }
 }
 
-// 📝 Register (defaults to student "user")
 export async function register(email, password) {
   try {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
@@ -36,13 +33,11 @@ export async function register(email, password) {
   }
 }
 
-// 🚪 Logout
 export async function logout() {
   await signOut(auth);
   window.location.href = "login.html";
 }
 
-// 🔒 Protect admin-only pages
 export async function protectAdminPage() {
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
