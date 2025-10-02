@@ -1,50 +1,71 @@
 // js/problem.js
-import { db } from "./firebase.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+// Load single problem by id (localStorage fallback). Show created date and hide solution until button click.
 
-// Get problem ID from URL query (?id=123)
-const urlParams = new URLSearchParams(window.location.search);
-const problemId = urlParams.get("id");
+const STORE_KEY = "azmath_problems_v1";
 
-const titleEl = document.getElementById("problem-title");
-const statementEl = document.getElementById("problem-statement");
-const solutionBtn = document.getElementById("show-solution");
-const solutionEl = document.getElementById("solution-container");
+document.addEventListener("DOMContentLoaded", () => {
+  const titleEl = document.getElementById("problem-title");
+  const metaEl = document.getElementById("problem-meta");
+  const statementEl = document.getElementById("problem-statement");
+  const showBtn = document.getElementById("show-solution");
+  const solutionEl = document.getElementById("solution-container");
 
-async function loadProblem() {
-  if (!problemId) {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("id");
+  if (!id) {
     titleEl.textContent = "Problem not found";
-    statementEl.textContent = "No problem ID provided.";
+    statementEl.textContent = "Missing problem id in URL.";
     return;
   }
 
-  try {
-    const docRef = doc(db, "problems", problemId);
-    const snap = await getDoc(docRef);
-
-    if (!snap.exists()) {
-      titleEl.textContent = "Problem not found";
-      statementEl.textContent = "This problem does not exist.";
-      return;
-    }
-
-    const data = snap.data();
-    titleEl.textContent = data.title || "Untitled Problem";
-    statementEl.textContent = data.statement || "No statement available.";
-    solutionEl.textContent = data.solution || "No solution available.";
-
-    // Only show button if solution exists
-    if (data.solution) {
-      solutionBtn.style.display = "inline-block";
-      solutionBtn.addEventListener("click", () => {
-        solutionEl.style.display = "block";
-        solutionBtn.style.display = "none";
-      });
-    }
-  } catch (err) {
-    titleEl.textContent = "Error loading problem";
-    statementEl.textContent = err.message;
+  const problems = loadProblemsFromStore();
+  const p = problems.find(x => x.id === id);
+  if (!p) {
+    titleEl.textContent = "Problem not found";
+    statementEl.textContent = `No problem with id="${id}"`;
+    return;
   }
-}
 
-loadProblem();
+  titleEl.textContent = p.title || "(no title)";
+  const created = formatDateNice(p.createdAt);
+  metaEl.textContent = `📅 Created: ${created}${p.updatedAt ? ` — Updated: ${formatDateNice(p.updatedAt)}` : ""}`;
+
+  // render statement (basic support for HTML)
+  statementEl.innerHTML = (p.statement || "").replace(/\n/g, "<br>");
+
+  if (p.solution && p.solution.trim()) {
+    showBtn.style.display = "inline-block";
+    showBtn.addEventListener("click", () => {
+      solutionEl.style.display = "block";
+      solutionEl.innerHTML = `<div class="card"><strong>Solution</strong><div style="margin-top:8px">${escapeHtml(p.solution).replace(/\n/g,"<br>")}</div></div>`;
+      showBtn.style.display = "none";
+    });
+  }
+
+  // images
+  if (p.images && p.images.length) {
+    p.images.forEach(u => {
+      const img = document.createElement("img");
+      img.src = u;
+      img.style.maxWidth = "100%";
+      img.style.marginTop = "12px";
+      statementEl.appendChild(img);
+    });
+  }
+
+  // helpers
+  function loadProblemsFromStore() {
+    try {
+      const raw = localStorage.getItem(STORE_KEY);
+      if (!raw) return [];
+      return JSON.parse(raw);
+    } catch (err) { return []; }
+  }
+  function formatDateNice(iso){
+    if(!iso) return "unknown";
+    const d = new Date(iso);
+    if (isNaN(d)) return iso;
+    return d.toLocaleDateString(undefined, { day:'2-digit', month:'short', year:'numeric' });
+  }
+  function escapeHtml(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+});
