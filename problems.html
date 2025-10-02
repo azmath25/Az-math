@@ -23,6 +23,7 @@
   <nav class="sidebar" id="sidebar">
     <ul>
       <li><a href="index.html">Home</a></li>
+      <li><a href="problems.html">Problems</a></li>
       <li><a href="lessons.html">Lessons</a></li>
     </ul>
   </nav>
@@ -31,8 +32,16 @@
 
   <main class="content">
     <h1>Problems</h1>
-    <div id="problems-list" class="card-grid"></div>
-    <div class="pagination">
+
+    <div class="toolbar" style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
+      <input type="text" id="global-problem-search" placeholder="Search problems..." style="flex:1;padding:8px;border-radius:6px;border:1px solid #ccc">
+      <button id="global-search-btn" class="btn">Search</button>
+      <button id="clear-search-btn" class="btn" style="background:#777;">Clear</button>
+    </div>
+
+    <div id="problems-list" class="card-grid" aria-live="polite"></div>
+
+    <div class="pagination" style="margin-top:16px;">
       <button id="prev-page" class="btn">Prev</button>
       <span id="page-info">Page 1</span>
       <button id="next-page" class="btn">Next</button>
