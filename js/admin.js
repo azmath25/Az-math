@@ -1,68 +1,43 @@
 // js/admin.js
-import { auth, db } from "./firebase.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-import { collection, getDocs, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import { db } from "./firebase.js";
+import { protectAdminPage } from "./auth.js";
+import { collection, addDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-const adminProblems = document.getElementById("admin-problems");
-const addProblemBtn = document.getElementById("addProblemBtn");
-const refreshBtn = document.getElementById("refreshProblemsBtn");
+// Protect page
+protectAdminPage();
 
-onAuthStateChanged(auth, async user => {
-  if (!user) {
-    // not logged in
-    if (adminProblems) adminProblems.innerHTML = "<small>Sign in as admin to edit.</small>";
-    return;
-  }
-  // NOTE: You should use a proper role check. For now we show UI to any signed user.
-  await loadAdminProblems();
-});
+// Add Problem
+const problemForm = document.getElementById("add-problem-form");
+if (problemForm) {
+  problemForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const title = document.getElementById("problem-title").value;
+    const statement = document.getElementById("problem-statement").value;
 
-async function loadAdminProblems() {
-  if (!adminProblems) return;
-  adminProblems.innerHTML = "Loading...";
-  try {
-    const snap = await getDocs(collection(db, "problems"));
-    adminProblems.innerHTML = "";
-    snap.forEach(docSnap => {
-      const d = docSnap.data();
-      const el = document.createElement("div");
-      el.className = "card";
-      el.innerHTML = `<strong>${d.title || "Untitled"}</strong>
-                      <div class="row">
-                        <button onclick="editProblem('${docSnap.id}')">Edit</button>
-                        <button onclick="deleteProblem('${docSnap.id}')">Delete</button>
-                      </div>`;
-      adminProblems.appendChild(el);
-    });
-  } catch (err) {
-    adminProblems.innerHTML = "Error: " + err.message;
-  }
+    try {
+      await addDoc(collection(db, "problems"), { title, statement });
+      alert("Problem added!");
+      problemForm.reset();
+    } catch (err) {
+      alert("Error adding problem: " + err.message);
+    }
+  });
 }
 
-window.editProblem = (id) => {
-  alert("Edit not implemented yet. ID: " + id);
-};
+// Add Lesson
+const lessonForm = document.getElementById("add-lesson-form");
+if (lessonForm) {
+  lessonForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const title = document.getElementById("lesson-title").value;
+    const content = document.getElementById("lesson-content").value;
 
-window.deleteProblem = async (id) => {
-  if (!confirm("Delete problem?")) return;
-  try {
-    await deleteDoc(doc(db, "problems", id));
-    alert("Deleted");
-    loadAdminProblems();
-  } catch (err) {
-    alert("Error: " + err.message);
-  }
-};
-
-if (addProblemBtn) addProblemBtn.addEventListener("click", async () => {
-  const title = prompt("Problem title:");
-  if (!title) return;
-  try {
-    await addDoc(collection(db, "problems"), {title, statement:"", createdAt: new Date().toISOString()});
-    loadAdminProblems();
-  } catch(err) {
-    alert(err.message);
-  }
-});
-
-if (refreshBtn) refreshBtn.addEventListener("click", loadAdminProblems);
+    try {
+      await addDoc(collection(db, "lessons"), { title, content });
+      alert("Lesson added!");
+      lessonForm.reset();
+    } catch (err) {
+      alert("Error adding lesson: " + err.message);
+    }
+  });
+}
