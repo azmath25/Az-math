@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lessons - Az-Math</title>
+  <title>Lesson - Az-Math</title>
   <link rel="stylesheet" href="css/style.css" />
   <script type="module" src="js/main.js" defer></script>
   <script type="module" src="js/menu.js" defer></script>
-  <script type="module" src="js/lessons.js" defer></script>
+  <script type="module" src="js/lesson.js" defer></script>
 </head>
 <body>
   <header class="navbar">
@@ -24,14 +24,18 @@
     <ul>
       <li><a href="index.html">Home</a></li>
       <li><a href="problems.html">Problems</a></li>
+      <li><a href="lessons.html">Lessons</a></li>
     </ul>
   </nav>
 
   <div id="menu"></div>
 
   <main class="content">
-    <h1>Lessons</h1>
-    <div id="lessons-list" class="card-grid"></div>
+    <h1 id="lesson-title">Loading...</h1>
+    <div id="lesson-content" class="lesson-content"></div>
+
+    <h2>Related Problems</h2>
+    <ul id="lesson-problems" class="problem-list"></ul>
   </main>
 </body>
 </html>
