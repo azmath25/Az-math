@@ -1,124 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
   <title>Admin Panel</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 20px; }
+    h1 { font-size: 2rem; }
+    .tabs { display: flex; gap: 30px; margin: 20px 0; }
+    .tabs button { background: none; border: none; font-size: 1.2rem; cursor: pointer; }
+    .tabs button.active { font-weight: bold; text-decoration: underline; }
+    .section { display: none; }
+    .section.active { display: block; }
+    .toolbar { margin: 10px 0; }
+    .toolbar input { padding: 5px; }
+    .toolbar button { padding: 5px 10px; margin-left: 5px; }
+    .card-grid { display: grid; gap: 10px; margin-top: 15px; }
+    .card { background: white; padding: 10px; border-radius: 6px; box-shadow: 0 0 4px rgba(0,0,0,0.1); }
+  </style>
 </head>
 <body>
-  <!-- Navbar -->
-  <header class="navbar">
-    <div class="site-title">Admin Panel</div>
-    <button id="menu-toggle" class="hamburger">☰</button>
-  </header>
+  <h1>Admin Panel</h1>
+  <div class="tabs">
+    <button data-tab="problems" class="active">Problems</button>
+    <button data-tab="lessons">Lessons</button>
+    <button data-tab="users">Users</button>
+  </div>
 
-  <!-- Sidebar -->
-  <aside id="sidebar" class="sidebar">
-    <ul>
-      <li><a href="index.html">Home</a></li>
-      <li><a href="problems.html">Problems</a></li>
-      <li><a href="lessons.html">Lessons</a></li>
-      <li><a href="profile.html">Profile</a></li>
-    </ul>
-  </aside>
-
-  <!-- Menu injected by menu.js -->
-  <div id="menu"></div>
-
-  <main class="content">
-    <h1>Admin Panel</h1>
-
-    <!-- Tabs -->
-    <div class="menu">
-      <button class="tab-btn" data-tab="problems">Problems</button>
-      <button class="tab-btn" data-tab="lessons">Lessons</button>
-      <button class="tab-btn" data-tab="users">Users</button>
+  <!-- Problems Section -->
+  <div id="problems-section" class="section active">
+    <h2>Manage Problems</h2>
+    <div class="toolbar">
+      <button id="add-problem-btn">+ Add Problem</button>
+      <input type="text" id="problem-search" placeholder="Search problems...">
+      <button id="search-problem-btn">Search</button>
     </div>
+    <div id="problems-list" class="card-grid"></div>
+  </div>
 
-    <!-- Problems Tab -->
-    <section id="tab-problems" class="tab-content">
-      <h2>Manage Problems</h2>
+  <!-- Lessons Section -->
+  <div id="lessons-section" class="section">
+    <h2>Manage Lessons</h2>
+    <div class="toolbar">
+      <button id="add-lesson-btn">+ Add Lesson</button>
+      <input type="text" id="lesson-search" placeholder="Search lessons...">
+      <button id="search-lesson-btn">Search</button>
+    </div>
+    <div id="lessons-list" class="card-grid"></div>
+  </div>
 
-      <!-- Add Problem -->
-      <form id="add-problem-form">
-        <label for="problem-title">Title</label>
-        <input type="text" id="problem-title" required />
+  <!-- Users Section -->
+  <div id="users-section" class="section">
+    <h2>Manage Users</h2>
+    <div class="toolbar">
+      <input type="text" id="user-search" placeholder="Search users...">
+      <button id="search-user-btn">Search</button>
+    </div>
+    <div id="users-list" class="card-grid"></div>
+  </div>
 
-        <label for="problem-statement">Problem Statement</label>
-        <textarea id="problem-statement" required></textarea>
-
-        <label for="problem-solution">Solution</label>
-        <textarea id="problem-solution" required></textarea>
-
-        <button type="submit" class="btn">+ Add Problem</button>
-      </form>
-
-      <!-- Search Problems -->
-      <div class="search-bar">
-        <input type="text" id="search-problem" placeholder="Search problems..." />
-        <button id="search-problem-btn" class="btn">Search</button>
-      </div>
-
-      <div id="problems-list" class="card-grid"></div>
-    </section>
-
-    <!-- Lessons Tab -->
-    <section id="tab-lessons" class="tab-content hidden">
-      <h2>Manage Lessons</h2>
-
-      <!-- Add Lesson -->
-      <form id="add-lesson-form">
-        <label for="lesson-title">Title</label>
-        <input type="text" id="lesson-title" required />
-
-        <label for="lesson-content">Content</label>
-        <textarea id="lesson-content" required></textarea>
-
-        <label for="lesson-cover">Cover Image URL</label>
-        <input type="url" id="lesson-cover" placeholder="https://..." />
-
-        <button type="submit" class="btn">+ Add Lesson</button>
-      </form>
-
-      <!-- Search Lessons -->
-      <div class="search-bar">
-        <input type="text" id="search-lesson" placeholder="Search lessons..." />
-        <button id="search-lesson-btn" class="btn">Search</button>
-      </div>
-
-      <div id="lessons-list" class="card-grid"></div>
-    </section>
-
-    <!-- Users Tab -->
-    <section id="tab-users" class="tab-content hidden">
-      <h2>Manage Users</h2>
-
-      <!-- Search Users -->
-      <div class="search-bar">
-        <input type="text" id="search-user" placeholder="Search users..." />
-        <button id="search-user-btn" class="btn">Search</button>
-      </div>
-
-      <div id="users-list" class="card-grid"></div>
-    </section>
-  </main>
-
-  <script type="module" src="js/main.js"></script>
-  <script type="module" src="js/menu.js"></script>
   <script type="module" src="js/admin.js"></script>
-
-  <script>
-    // Simple tab switcher
-    document.querySelectorAll(".tab-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const tab = btn.dataset.tab;
-        document.querySelectorAll(".tab-content").forEach(sec =>
-          sec.classList.add("hidden")
-        );
-        document.getElementById("tab-" + tab).classList.remove("hidden");
-      });
-    });
-  </script>
 </body>
 </html>
