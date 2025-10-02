@@ -90,3 +90,20 @@ input[type="text"], input[type="email"], input[type="password"]{
 /* Utility */
 .row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
 small{ color:#666; }
+
+.profile-icon {
+  width: 36px;        /* default desktop size */
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;  /* crop nicely */
+  cursor: pointer;
+}
+
+/* On small screens (mobile) */
+@media (max-width: 600px) {
+  .profile-icon {
+    width: 28px;
+    height: 28px;
+  }
+}
+
