@@ -1,35 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin - Az-Math</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <div id="menu"></div>
 
   <main class="container">
-    <h1>Admin dashboard</h1>
-
-    <section class="card">
-      <h2>Problems</h2>
-      <div class="row">
-        <button id="addProblemBtn" class="btn blue">➕ Add Problem</button>
-        <button id="refreshProblemsBtn" class="btn">Refresh</button>
-      </div>
-      <div id="admin-problems"></div>
-    </section>
-
-    <section class="card">
-      <h2>Users</h2>
-      <div id="admin-users"></div>
-    </section>
+    <h2>Admin Panel</h2>
+    <div class="admin-actions">
+      <button class="action-btn">Add Problem</button>
+      <button class="action-btn">Add Lesson</button>
+      <button class="action-btn">Manage Users</button>
+    </div>
   </main>
 
-  <script type="module" src="js/firebase.js"></script>
   <script type="module" src="js/menu.js"></script>
-  <script type="module" src="js/admin.js"></script>
 </body>
 </html>
-
