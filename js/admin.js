@@ -4,131 +4,158 @@ import { protectAdminPage } from "./auth.js";
 import {
   collection,
   addDoc,
+  getDocs,
   query,
   where,
-  getDocs
+  doc,
+  updateDoc,
+  getDoc,
+  setDoc
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
 // Protect page
 protectAdminPage();
 
-/* ---------- Tab Switching ---------- */
-document.querySelectorAll(".tab-btn").forEach(btn => {
+// ----- Tab Switching -----
+const tabButtons = document.querySelectorAll(".tab-btn");
+const tabContents = document.querySelectorAll(".tab-content");
+
+tabButtons.forEach((btn) => {
   btn.addEventListener("click", () => {
-    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-    document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+    tabButtons.forEach((b) => b.classList.remove("active"));
+    tabContents.forEach((c) => c.classList.remove("active"));
     btn.classList.add("active");
     document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
   });
 });
 
-/* ---------- Toggle Add Problem Form ---------- */
-const addProblemBtn = document.getElementById("btn-add-problem");
-if (addProblemBtn) {
-  addProblemBtn.addEventListener("click", () => {
-    document.getElementById("add-problem-container").classList.toggle("hidden");
-  });
+// ----- Helper: Get Next ID -----
+async function getNextId(type) {
+  const ref = doc(db, "meta", type);
+  const snap = await getDoc(ref);
+  let newId = 1;
+  if (snap.exists()) {
+    newId = snap.data().lastId + 1;
+  }
+  await setDoc(ref, { lastId: newId });
+  return newId;
 }
 
-/* ---------- Toggle Add Lesson Form ---------- */
-const addLessonBtn = document.getElementById("btn-add-lesson");
-if (addLessonBtn) {
-  addLessonBtn.addEventListener("click", () => {
-    document.getElementById("add-lesson-container").classList.toggle("hidden");
-  });
-}
-
-/* ---------- Add Problem ---------- */
+// ----- Add Problem -----
 const problemForm = document.getElementById("add-problem-form");
 if (problemForm) {
   problemForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const title = document.getElementById("problem-title").value.trim();
-    const statement = document.getElementById("problem-statement").value.trim();
-    const solution = document.getElementById("problem-solution").value.trim();
-
-    if (!title || !statement) return alert("Fill in all fields!");
+    const title = document.getElementById("problem-title").value;
+    const statement = document.getElementById("problem-statement").value;
+    const solution = document.getElementById("problem-solution").value;
 
     try {
-      await addDoc(collection(db, "problems"), { title, statement, solution });
-      alert("Problem added!");
+      const id = await getNextId("problems");
+      await setDoc(doc(db, "problems", id.toString()), {
+        id,
+        title,
+        statement,
+        solution,
+      });
+      alert("Problem added with ID " + id);
       problemForm.reset();
-      document.getElementById("add-problem-container").classList.add("hidden");
     } catch (err) {
       alert("Error adding problem: " + err.message);
     }
   });
 }
 
-/* ---------- Add Lesson ---------- */
+// ----- Add Lesson -----
 const lessonForm = document.getElementById("add-lesson-form");
 if (lessonForm) {
   lessonForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const title = document.getElementById("lesson-title").value.trim();
-    const content = document.getElementById("lesson-content").value.trim();
-
-    if (!title || !content) return alert("Fill in all fields!");
+    const title = document.getElementById("lesson-title").value;
+    const cover = document.getElementById("lesson-cover").value;
+    const content = document.getElementById("lesson-content").value;
 
     try {
-      await addDoc(collection(db, "lessons"), { title, content });
-      alert("Lesson added!");
+      const id = await getNextId("lessons");
+      await setDoc(doc(db, "lessons", id.toString()), {
+        id,
+        title,
+        cover,
+        content,
+      });
+      alert("Lesson added with ID " + id);
       lessonForm.reset();
-      document.getElementById("add-lesson-container").classList.add("hidden");
     } catch (err) {
       alert("Error adding lesson: " + err.message);
     }
   });
 }
 
-/* ---------- Search Problems (basic Firestore query) ---------- */
-const searchProblemBtn = document.getElementById("btn-search-problem");
-if (searchProblemBtn) {
-  searchProblemBtn.addEventListener("click", async () => {
-    const term = document.getElementById("search-problem").value.trim();
-    if (!term) return alert("Enter search text");
-
-    const q = query(collection(db, "problems"), where("title", "==", term));
-    const snap = await getDocs(q);
-
-    const list = document.getElementById("problems-list");
-    list.innerHTML = "";
-    snap.forEach(doc => {
-      const d = doc.data();
-      const card = document.createElement("div");
-      card.className = "card";
-      card.innerHTML = `<h3>${d.title}</h3><p>${d.statement}</p>`;
-      list.appendChild(card);
-    });
-
-    if (snap.empty) {
-      list.innerHTML = `<p>No problems found for "${term}"</p>`;
+// ----- Search Problems -----
+document.getElementById("search-problem-btn")?.addEventListener("click", async () => {
+  const term = document.getElementById("search-problem").value.toLowerCase();
+  const q = query(collection(db, "problems"));
+  const snapshot = await getDocs(q);
+  const list = document.getElementById("problems-list");
+  list.innerHTML = "";
+  snapshot.forEach((docSnap) => {
+    const p = docSnap.data();
+    if (
+      p.title.toLowerCase().includes(term) ||
+      p.statement.toLowerCase().includes(term) ||
+      p.id.toString() === term
+    ) {
+      list.innerHTML += `<div class="card"><h3>${p.title}</h3><p>${p.statement}</p></div>`;
     }
   });
-}
+});
 
-/* ---------- Search Lessons (basic) ---------- */
-const searchLessonBtn = document.getElementById("btn-search-lesson");
-if (searchLessonBtn) {
-  searchLessonBtn.addEventListener("click", async () => {
-    const term = document.getElementById("search-lesson").value.trim();
-    if (!term) return alert("Enter search text");
-
-    const q = query(collection(db, "lessons"), where("title", "==", term));
-    const snap = await getDocs(q);
-
-    const list = document.getElementById("lessons-list");
-    list.innerHTML = "";
-    snap.forEach(doc => {
-      const d = doc.data();
-      const card = document.createElement("div");
-      card.className = "card";
-      card.innerHTML = `<h3>${d.title}</h3><p>${d.content}</p>`;
-      list.appendChild(card);
-    });
-
-    if (snap.empty) {
-      list.innerHTML = `<p>No lessons found for "${term}"</p>`;
+// ----- Search Lessons -----
+document.getElementById("search-lesson-btn")?.addEventListener("click", async () => {
+  const term = document.getElementById("search-lesson").value.toLowerCase();
+  const q = query(collection(db, "lessons"));
+  const snapshot = await getDocs(q);
+  const list = document.getElementById("lessons-list");
+  list.innerHTML = "";
+  snapshot.forEach((docSnap) => {
+    const l = docSnap.data();
+    if (
+      l.title.toLowerCase().includes(term) ||
+      l.content.toLowerCase().includes(term) ||
+      l.id.toString() === term
+    ) {
+      list.innerHTML += `<div class="card"><h3>${l.title}</h3><p>${l.content}</p></div>`;
     }
   });
-}
+});
+
+// ----- Search Users & Role Management -----
+document.getElementById("search-user-btn")?.addEventListener("click", async () => {
+  const term = document.getElementById("search-user").value.toLowerCase();
+  const q = query(collection(db, "users"));
+  const snapshot = await getDocs(q);
+  const list = document.getElementById("users-list");
+  list.innerHTML = "";
+  snapshot.forEach((docSnap) => {
+    const u = docSnap.data();
+    if (u.email.toLowerCase().includes(term) || u.role.toLowerCase().includes(term)) {
+      list.innerHTML += `
+        <div class="card">
+          <h3>${u.email}</h3>
+          <p>Role: ${u.role}</p>
+          <button class="btn" onclick="window.changeRole('${docSnap.id}','admin')">Make Admin</button>
+          <button class="btn" onclick="window.changeRole('${docSnap.id}','user')">Make User</button>
+        </div>`;
+    }
+  });
+});
+
+// ----- Change Role -----
+window.changeRole = async (uid, role) => {
+  try {
+    await updateDoc(doc(db, "users", uid), { role });
+    alert("Role updated to " + role);
+  } catch (err) {
+    alert("Error updating role: " + err.message);
+  }
+};
