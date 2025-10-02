@@ -2,30 +2,48 @@
 import { db } from "./firebase.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-function getProblemId() {
-  const params = new URLSearchParams(window.location.search);
-  return params.get("id");
-}
+// Get problem ID from URL query (?id=123)
+const urlParams = new URLSearchParams(window.location.search);
+const problemId = urlParams.get("id");
+
+const titleEl = document.getElementById("problem-title");
+const statementEl = document.getElementById("problem-statement");
+const solutionBtn = document.getElementById("show-solution");
+const solutionEl = document.getElementById("solution-container");
 
 async function loadProblem() {
-  const id = getProblemId();
-  if (!id) return;
+  if (!problemId) {
+    titleEl.textContent = "Problem not found";
+    statementEl.textContent = "No problem ID provided.";
+    return;
+  }
 
-  const snap = await getDoc(doc(db, "problems", id));
-  if (snap.exists()) {
+  try {
+    const docRef = doc(db, "problems", problemId);
+    const snap = await getDoc(docRef);
+
+    if (!snap.exists()) {
+      titleEl.textContent = "Problem not found";
+      statementEl.textContent = "This problem does not exist.";
+      return;
+    }
+
     const data = snap.data();
-    document.getElementById("problem-title").textContent = data.title;
-    document.getElementById("problem-statement").textContent = data.statement;
+    titleEl.textContent = data.title || "Untitled Problem";
+    statementEl.textContent = data.statement || "No statement available.";
+    solutionEl.textContent = data.solution || "No solution available.";
 
-    const solutionBtn = document.getElementById("show-solution");
-    const solContainer = document.getElementById("solution-container");
-
-    solutionBtn.addEventListener("click", () => {
-      solContainer.style.display = "block";
-      solContainer.innerHTML = data.solution || "<p>No solution yet.</p>";
-    });
-  } else {
-    document.getElementById("problem-title").textContent = "Problem not found";
+    // Only show button if solution exists
+    if (data.solution) {
+      solutionBtn.style.display = "inline-block";
+      solutionBtn.addEventListener("click", () => {
+        solutionEl.style.display = "block";
+        solutionBtn.style.display = "none";
+      });
+    }
+  } catch (err) {
+    titleEl.textContent = "Error loading problem";
+    statementEl.textContent = err.message;
   }
 }
 
