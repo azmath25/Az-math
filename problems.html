@@ -1,38 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Problems - Az-Math</title>
   <link rel="stylesheet" href="css/style.css" />
   <script type="module" src="js/main.js" defer></script>
   <script type="module" src="js/menu.js" defer></script>
-
-  <script>
-    window.MathJax = {
-      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$','$$']] },
-      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
-    };
-  </script>
-  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-
   <script type="module" src="js/problems.js" defer></script>
 </head>
 <body>
   <header class="navbar">
     <div class="nav-left">
-      <button id="menu-toggle" class="hamburger">☰</button>
+      <button class="hamburger" id="menu-toggle">☰</button>
       <span class="site-title">Az-Math</span>
     </div>
     <div class="nav-right">
-      <img id="profile-photo" class="profile-icon" src="assets/img/defaultprofile.png" alt="profile">
+      <img src="assets/img/defaultprofile.png" class="profile-icon" id="profile-photo">
     </div>
   </header>
 
-  <nav id="sidebar" class="sidebar">
+  <nav class="sidebar" id="sidebar">
     <ul>
       <li><a href="index.html">Home</a></li>
-      <li><a href="problems.html">Problems</a></li>
       <li><a href="lessons.html">Lessons</a></li>
     </ul>
   </nav>
@@ -41,17 +31,35 @@
 
   <main class="content">
     <h1>Problems</h1>
-
-    <div class="toolbar">
-      <input id="global-problem-search" type="search" placeholder="Search problems..." />
-      <button id="global-search-btn" class="btn">Search</button>
-      <a href="admin.html" class="btn" style="background:#2563eb;">Admin</a>
+    
+    <!-- Search and Filters -->
+    <div class="search-container">
+      <input type="text" id="search-input" placeholder="Search problems by title, category, or tags..." />
+      
+      <div class="filters">
+        <select id="category-filter">
+          <option value="">All Categories</option>
+          <option value="Algebra">Algebra</option>
+          <option value="Geometry">Geometry</option>
+          <option value="Number Theory">Number Theory</option>
+          <option value="Combinatorics">Combinatorics</option>
+        </select>
+        
+        <select id="difficulty-filter">
+          <option value="">All Difficulties</option>
+          <option value="Easy">Easy</option>
+          <option value="Medium">Medium</option>
+          <option value="Hard">Hard</option>
+        </select>
+      </div>
     </div>
 
-    <div id="problems-list" class="card-grid"></div>
-
+    <!-- Problems List -->
+    <div id="problems-list" class="problems-wide-list"></div>
+    
+    <!-- Pagination -->
     <div class="pagination">
-      <button id="prev-page" class="btn">Prev</button>
+      <button id="prev-page" class="btn" disabled>Previous</button>
       <span id="page-info">Page 1</span>
       <button id="next-page" class="btn">Next</button>
     </div>
