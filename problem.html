@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Problem - Az-Math</title>
   <link rel="stylesheet" href="css/style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
-
   <script type="module" src="js/main.js" defer></script>
   <script type="module" src="js/menu.js" defer></script>
   <script type="module" src="js/problem.js" defer></script>
@@ -18,7 +16,7 @@
       <span class="site-title">Az-Math</span>
     </div>
     <div class="nav-right">
-      <img src="assets/img/defaultprofile.png" class="profile-icon" id="profile-photo" alt="profile">
+      <img src="assets/img/defaultprofile.png" class="profile-icon" id="profile-photo">
     </div>
   </header>
 
@@ -33,13 +31,47 @@
   <div id="menu"></div>
 
   <main class="content">
-    <h1 id="problem-title">Loading problem...</h1>
-    <div class="meta" id="problem-meta" style="margin-bottom:12px;"></div>
+    <div class="problem-detail">
+      <!-- Problem Header -->
+      <div class="problem-detail-header">
+        <h1 id="problem-title">Loading...</h1>
+        <div class="problem-meta">
+          <span id="problem-id" class="meta-item"></span>
+          <span id="problem-category" class="meta-item"></span>
+          <span id="problem-difficulty" class="meta-item"></span>
+        </div>
+        <div id="problem-tags" class="problem-tags"></div>
+      </div>
 
-    <div id="problem-statement" class="problem-statement">Please wait...</div>
+      <!-- Problem Statement -->
+      <div class="section">
+        <h2>Problem Statement</h2>
+        <div id="problem-statement" class="content-blocks"></div>
+      </div>
 
-    <button id="show-solution" class="btn" style="display:none;margin-top:12px;">Show Solution</button>
-    <div id="solution-container" style="display:none;margin-top:12px;"></div>
+      <!-- Solutions -->
+      <div class="section">
+        <h2>Solutions</h2>
+        <button id="show-solutions" class="btn">Show Solutions</button>
+        <div id="solutions-container" style="display:none;"></div>
+      </div>
+
+      <!-- Metadata -->
+      <div class="section metadata-section">
+        <h3>Metadata</h3>
+        <p><strong>Author:</strong> <span id="problem-author"></span></p>
+        <p><strong>Created:</strong> <span id="problem-timestamp"></span></p>
+        <div id="lesson-refs">
+          <strong>Used in Lessons:</strong>
+          <ul id="lesson-list"></ul>
+        </div>
+      </div>
+
+      <!-- Back Button -->
+      <div class="section">
+        <a href="problems.html" class="btn">← Back to Problems</a>
+      </div>
+    </div>
   </main>
 </body>
 </html>
