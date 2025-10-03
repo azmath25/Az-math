@@ -31,6 +31,23 @@
 
   <main class="content">
     <h1>Lessons</h1>
+    
+    <!-- Search and Filters -->
+    <div class="search-container">
+      <input type="text" id="search-input" placeholder="Search lessons by title, category, or tags..." />
+      
+      <div class="filters">
+        <select id="category-filter">
+          <option value="">All Categories</option>
+          <option value="Algebra">Algebra</option>
+          <option value="Geometry">Geometry</option>
+          <option value="Number Theory">Number Theory</option>
+          <option value="Combinatorics">Combinatorics</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Lessons Grid -->
     <div id="lessons-list" class="card-grid"></div>
   </main>
 </body>
