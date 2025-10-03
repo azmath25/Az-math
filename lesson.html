@@ -31,11 +31,34 @@
   <div id="menu"></div>
 
   <main class="content">
-    <h1 id="lesson-title">Loading...</h1>
-    <div id="lesson-content" class="lesson-content"></div>
+    <div class="lesson-detail">
+      <!-- Lesson Header -->
+      <div class="lesson-detail-header">
+        <h1 id="lesson-title">Loading...</h1>
+        <div class="lesson-meta">
+          <span id="lesson-id" class="meta-item"></span>
+          <span id="lesson-category" class="meta-item"></span>
+        </div>
+        <div id="lesson-tags" class="lesson-tags"></div>
+      </div>
 
-    <h2>Related Problems</h2>
-    <ul id="lesson-problems" class="problem-list"></ul>
+      <!-- Lesson Content (blocks) -->
+      <div class="section">
+        <div id="lesson-content" class="content-blocks"></div>
+      </div>
+
+      <!-- Metadata -->
+      <div class="section metadata-section">
+        <h3>Metadata</h3>
+        <p><strong>Author:</strong> <span id="lesson-author"></span></p>
+        <p><strong>Created:</strong> <span id="lesson-timestamp"></span></p>
+      </div>
+
+      <!-- Back Button -->
+      <div class="section">
+        <a href="lessons.html" class="btn">← Back to Lessons</a>
+      </div>
+    </div>
   </main>
 </body>
 </html>
