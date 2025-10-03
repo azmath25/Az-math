@@ -3,19 +3,74 @@
 <head>
   <meta charset="UTF-8">
   <title>Edit Problem</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Include Firebase -->
   <script type="module" src="./js/edit-problem.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    h1 {
+      margin-bottom: 1rem;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-width: 600px;
+    }
+    label {
+      font-weight: bold;
+    }
+    input, textarea {
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+      width: 100%;
+    }
+    textarea {
+      min-height: 100px;
+    }
+    button {
+      padding: 0.75rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button[type="submit"] {
+      background-color: #2563eb;
+      color: white;
+    }
+    #deleteBtn {
+      background-color: #dc2626;
+      color: white;
+    }
+  </style>
 </head>
 <body>
   <h1>Edit Problem</h1>
   <form id="editProblemForm">
-    <label>Title:</label>
-    <input type="text" id="title"><br>
-    <label>Statement:</label>
-    <textarea id="statement"></textarea><br>
-    <label>Solution:</label>
-    <textarea id="solution"></textarea><br>
-    <button type="submit">Save</button>
-    <button type="button" id="deleteBtn">Delete</button>
+    <div>
+      <label for="title">Title:</label><br>
+      <input type="text" id="title" required>
+    </div>
+    <div>
+      <label for="statement">Statement:</label><br>
+      <textarea id="statement" required></textarea>
+    </div>
+    <div>
+      <label for="solution">Solution:</label><br>
+      <textarea id="solution"></textarea>
+    </div>
+    <div style="display:flex; gap:1rem;">
+      <button type="submit">Save</button>
+      <button type="button" id="deleteBtn">Delete</button>
+    </div>
   </form>
 </body>
 </html>
