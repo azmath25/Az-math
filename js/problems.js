@@ -1,90 +1,162 @@
 // js/problems.js
 import { db } from "./firebase.js";
-import { collection, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+import { collection, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-const PAGE_SIZE = 50;
-let problems = [];
-let filtered = [];
+const container = document.getElementById("problems-list");
+const searchInput = document.getElementById("search-input");
+const categoryFilter = document.getElementById("category-filter");
+const difficultyFilter = document.getElementById("difficulty-filter");
+const pageInfo = document.getElementById("page-info");
+const prevBtn = document.getElementById("prev-page");
+const nextBtn = document.getElementById("next-page");
+
+let allProblems = [];
+let filteredProblems = [];
 let currentPage = 1;
+const pageSize = 10;
 
-document.addEventListener("DOMContentLoaded", async () => {
-  const listEl = document.getElementById("problems-list");
-  const searchInput = document.getElementById("global-problem-search");
-  const searchBtn = document.getElementById("global-search-btn");
-  const prevBtn = document.getElementById("prev-page");
-  const nextBtn = document.getElementById("next-page");
-  const pageInfo = document.getElementById("page-info");
+// Render a block (text, image, problem ref, lesson ref)
+function renderBlock(block) {
+  if (block.type === "text") {
+    return `<p>${block.content}</p>`;
+  } else if (block.type === "image") {
+    return `<img src="${block.url}" alt="Problem image" style="max-width:100%; border-radius:8px; margin:0.5rem 0;" />`;
+  } else if (block.type === "problem") {
+    return `<a href="problem.html?id=${block.problemId}" class="ref-link">→ Problem #${block.problemId}</a>`;
+  } else if (block.type === "lesson") {
+    return `<a href="lesson.html?id=${block.lessonId}" class="ref-link">→ Lesson #${block.lessonId}</a>`;
+  }
+  return "";
+}
 
-  await loadProblems();
-  filtered = problems.slice();
-  renderPage(1);
+// Render problem card (wide, ~80% width)
+function renderProblemCard(problem) {
+  const statementHTML = (problem.statement || []).map(renderBlock).join("");
+  const tagsHTML = (problem.tags || []).map(tag => `<span class="tag">${tag}</span>`).join("");
+  
+  return `
+    <div class="problem-card-wide">
+      <div class="problem-header">
+        <span class="problem-id">Problem #${problem.id || problem.number || "?"}</span>
+        <span class="problem-category">${problem.category || "Uncategorized"}</span>
+        <span class="problem-difficulty difficulty-${(problem.difficulty || "medium").toLowerCase()}">${problem.difficulty || "Medium"}</span>
+      </div>
+      
+      <div class="problem-tags">${tagsHTML}</div>
+      
+      <div class="problem-body">
+        ${statementHTML || "<p>No statement available.</p>"}
+      </div>
+      
+      <div class="problem-footer">
+        <a href="problem.html?id=${problem.docId}" class="btn">View Problem →</a>
+      </div>
+    </div>
+  `;
+}
 
-  searchBtn.addEventListener("click", doSearch);
-  searchInput.addEventListener("keydown", (e) => { if (e.key === "Enter") doSearch(); });
-  prevBtn.addEventListener("click", () => { if (currentPage > 1) renderPage(currentPage - 1); });
-  nextBtn.addEventListener("click", () => { const tot = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE)); if (currentPage < tot) renderPage(currentPage + 1); });
+// Load all problems from Firestore
+async function loadAllProblems() {
+  try {
+    const q = query(collection(db, "problems"), where("draft", "==", false));
+    const snapshot = await getDocs(q);
+    
+    allProblems = [];
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      allProblems.push({ ...data, docId: doc.id });
+    });
+    
+    // Sort by ID/number
+    allProblems.sort((a, b) => (a.id || a.number || 0) - (b.id || b.number || 0));
+    
+    filteredProblems = [...allProblems];
+    renderPage();
+  } catch (err) {
+    console.error("Error loading problems:", err);
+    container.innerHTML = "<p>Failed to load problems.</p>";
+  }
+}
 
-  async function loadProblems() {
-    listEl.innerHTML = "Loading...";
-    try {
-      const q = query(collection(db, "problems"), orderBy("createdAt", "desc"));
-      const snap = await getDocs(q);
-      problems = snap.docs.map(d => ({ _docId: d.id, ...d.data() }));
-    } catch (err) {
-      console.error("Load failed:", err);
-      listEl.innerHTML = `<div style="padding:20px;color:#a00">Failed to load problems</div>`;
+// Filter problems based on search and filters
+function applyFilters() {
+  const searchTerm = searchInput.value.toLowerCase();
+  const category = categoryFilter.value;
+  const difficulty = difficultyFilter.value;
+  
+  filteredProblems = allProblems.filter(problem => {
+    // Search filter
+    const matchesSearch = 
+      (problem.title || "").toLowerCase().includes(searchTerm) ||
+      (problem.category || "").toLowerCase().includes(searchTerm) ||
+      (problem.tags || []).some(tag => tag.toLowerCase().includes(searchTerm));
+    
+    // Category filter
+    const matchesCategory = !category || problem.category === category;
+    
+    // Difficulty filter
+    const matchesDifficulty = !difficulty || problem.difficulty === difficulty;
+    
+    return matchesSearch && matchesCategory && matchesDifficulty;
+  });
+  
+  currentPage = 1;
+  renderPage();
+}
+
+// Render current page
+function renderPage() {
+  const startIdx = (currentPage - 1) * pageSize;
+  const endIdx = startIdx + pageSize;
+  const pageProblems = filteredProblems.slice(startIdx, endIdx);
+  
+  if (pageProblems.length === 0) {
+    container.innerHTML = "<p>No problems found.</p>";
+  } else {
+    container.innerHTML = pageProblems.map(renderProblemCard).join("");
+  }
+  
+  // Update pagination
+  const totalPages = Math.ceil(filteredProblems.length / pageSize);
+  pageInfo.textContent = `Page ${currentPage} of ${totalPages || 1}`;
+  
+  prevBtn.disabled = currentPage === 1;
+  nextBtn.disabled = currentPage >= totalPages;
+}
+
+// Event listeners
+if (searchInput) {
+  searchInput.addEventListener("input", applyFilters);
+}
+
+if (categoryFilter) {
+  categoryFilter.addEventListener("change", applyFilters);
+}
+
+if (difficultyFilter) {
+  difficultyFilter.addEventListener("change", applyFilters);
+}
+
+if (prevBtn) {
+  prevBtn.addEventListener("click", () => {
+    if (currentPage > 1) {
+      currentPage--;
+      renderPage();
+      window.scrollTo(0, 0);
     }
-  }
+  });
+}
 
-  function doSearch() {
-    const q = (searchInput.value || "").trim().toLowerCase();
-    if (!q) filtered = problems.slice();
-    else filtered = problems.filter(p => (p.title||"").toLowerCase().includes(q) || (p.statement||"").toLowerCase().includes(q) || (p.tags||[]).join(" ").toLowerCase().includes(q));
-    renderPage(1);
-  }
-
-  function renderPage(page = 1) {
-    currentPage = page;
-    const start = (page - 1) * PAGE_SIZE;
-    const items = filtered.slice(start, start + PAGE_SIZE);
-    listEl.innerHTML = "";
-    if (!items.length) {
-      listEl.innerHTML = `<div style="padding:20px;color:#666">No problems found.</div>`;
-    } else {
-      for (const p of items) {
-        const createdPretty = formatDate(p.createdAt);
-        const snippet = truncate(stripTags(p.statement || ""), 220);
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `
-          <h3>${escapeHtml(p.title || "(no title)")}</h3>
-          <p>${escapeHtml(snippet)}</p>
-          <div class="meta">ID: ${p.id ?? "(no id)"} • 📅 ${createdPretty}</div>
-          <div class="actions">
-            <a class="btn" href="problem.html?id=${encodeURIComponent(p._docId)}">Open</a>
-            <a class="btn" href="admin.html" style="background:#666;">Admin</a>
-          </div>
-        `;
-        listEl.appendChild(card);
-      }
+if (nextBtn) {
+  nextBtn.addEventListener("click", () => {
+    const totalPages = Math.ceil(filteredProblems.length / pageSize);
+    if (currentPage < totalPages) {
+      currentPage++;
+      renderPage();
+      window.scrollTo(0, 0);
     }
-    const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-    pageInfo.textContent = `Page ${currentPage} / ${totalPages}`;
-    prevBtn.disabled = currentPage <= 1;
-    nextBtn.disabled = currentPage >= totalPages;
+  });
+}
 
-    if (window.MathJax && window.MathJax.typesetPromise) MathJax.typesetPromise();
-  }
-
-  function formatDate(ts) {
-    if (!ts) return "unknown";
-    try {
-      if (typeof ts.toDate === "function") return ts.toDate().toLocaleDateString();
-      if (ts.seconds) return new Date(ts.seconds * 1000).toLocaleDateString();
-      return new Date(ts).toLocaleDateString();
-    } catch(e) { return String(ts); }
-  }
-  function truncate(s,n=140){ if(!s) return ""; return s.length>n ? s.slice(0,n-1)+"…" : s; }
-  function stripTags(s){ return String(s||"").replace(/<\/?[^>]+(>|$)/g,""); }
-  function escapeHtml(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-});
+// Initial load
+if (container) loadAllProblems();
