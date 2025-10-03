@@ -127,3 +127,225 @@ form textarea { min-height:80px; resize:vertical; }
   .modal-content{ padding:1rem; }
   .card-grid{ grid-template-columns: 1fr; }
 }
+/* Search Container */
+.search-container {
+  margin-bottom: 2rem;
+}
+
+.search-container input {
+  width: 100%;
+  padding: 0.7rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.filters {
+  display: flex;
+  gap: 1rem;
+}
+
+.filters select {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+/* Wide Problem Cards */
+.problems-wide-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.problem-card-wide {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 1.5rem;
+  width: 80%;
+  margin: 0 auto;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.problem-header {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.problem-id {
+  font-weight: bold;
+  color: #2563eb;
+}
+
+.problem-category {
+  background: #e5e7eb;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.problem-difficulty {
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.difficulty-easy { background: #86efac; color: #166534; }
+.difficulty-medium { background: #fde047; color: #854d0e; }
+.difficulty-hard { background: #fca5a5; color: #991b1b; }
+
+.problem-tags, .lesson-tags {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 0.5rem 0;
+}
+
+.tag {
+  background: #dbeafe;
+  color: #1e40af;
+  padding: 0.25rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+}
+
+.problem-body {
+  margin: 1rem 0;
+  line-height: 1.8;
+}
+
+.problem-footer {
+  text-align: right;
+  margin-top: 1rem;
+}
+
+/* Problem Detail Page */
+.problem-detail, .lesson-detail {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.problem-detail-header, .lesson-detail-header {
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+
+.problem-meta, .lesson-meta {
+  display: flex;
+  gap: 1rem;
+  margin: 0.5rem 0;
+}
+
+.meta-item {
+  background: #f3f4f6;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.section {
+  margin: 2rem 0;
+}
+
+.content-blocks p {
+  margin: 1rem 0;
+  line-height: 1.8;
+}
+
+.ref-block {
+  background: #f0f9ff;
+  border-left: 4px solid #3b82f6;
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 6px;
+}
+
+.ref-link {
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.ref-link:hover {
+  text-decoration: underline;
+}
+
+.solution-block {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+}
+
+.solution-block h3 {
+  margin-top: 0;
+  color: #059669;
+}
+
+.metadata-section {
+  background: #f9fafb;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+/* Problem Preview Card (in lessons) */
+.problem-preview-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1.5rem 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.problem-preview-card h4 {
+  margin: 0 0 0.5rem 0;
+  color: #2563eb;
+}
+
+.problem-preview-category {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0.3rem 0;
+}
+
+.btn-small {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+}
+
+/* Lesson Cards */
+.lesson-card {
+  position: relative;
+}
+
+.lesson-cover {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px 8px 0 0;
+  margin: -1rem -1rem 1rem -1rem;
+}
+
+.lesson-category {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin: 0.5rem 0;
+}
+
+.lesson-description {
+  color: #4b5563;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
