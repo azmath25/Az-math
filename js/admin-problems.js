@@ -170,7 +170,7 @@ async function addNewProblem() {
       author: "",
       timestamp: Date.now(),
       statement: [{ type: "text", content: "" }],
-      solutions: [[{ type: "text", content: "" }]],
+      solutions: [{ type: "text", content: "" }], // ✅ fixed: no nested array
       lessons: []
     });
     
