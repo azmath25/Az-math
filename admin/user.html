@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Users - Az-Math</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <script type="module" src="../js/main.js" defer></script>
+  <script type="module" src="../js/menu.js" defer></script>
+  <script type="module" src="../js/users.js" defer></script>
+</head>
+<body>
+  <header class="navbar">
+    <div class="nav-left">
+      <button class="hamburger" id="menu-toggle">☰</button>
+      <span class="site-title">Az-Math Admin</span>
+    </div>
+    <div class="nav-right">
+      <img src="../assets/img/defaultprofile.png" class="profile-icon" id="profile-photo">
+    </div>
+  </header>
+
+  <nav class="sidebar" id="sidebar">
+    <ul>
+      <li><a href="../index.html">🏠 Home</a></li>
+      <li><a href="index.html">📊 Dashboard</a></li>
+      <li><a href="problems.html">📝 Problems</a></li>
+      <li><a href="lessons.html">📚 Lessons</a></li>
+    </ul>
+  </nav>
+
+  <div id="menu"></div>
+
+  <main class="content">
+    <div class="admin-header">
+      <h1>Manage Users</h1>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="search-container">
+      <input type="text" id="search-input" placeholder="Search users by email..." />
+      
+      <div class="filters">
+        <select id="role-filter">
+          <option value="">All Roles</option>
+          <option value="admin">Admin</option>
+          <option value="user">User</option>
+          <option value="pending">Pending Approval</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="users-table-container">
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Joined</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="users-list">
+          <tr>
+            <td colspan="4" style="text-align:center; padding:2rem;">Loading users...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</body>
+</html>
