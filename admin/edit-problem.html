@@ -1,76 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Edit Problem</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Include Firebase -->
-  <script type="module" src="./js/edit-problem.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 2rem;
-      background-color: #f9f9f9;
-      color: #333;
-    }
-    h1 {
-      margin-bottom: 1rem;
-    }
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      max-width: 600px;
-    }
-    label {
-      font-weight: bold;
-    }
-    input, textarea {
-      padding: 0.5rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 1rem;
-      width: 100%;
-    }
-    textarea {
-      min-height: 100px;
-    }
-    button {
-      padding: 0.75rem;
-      font-size: 1rem;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    button[type="submit"] {
-      background-color: #2563eb;
-      color: white;
-    }
-    #deleteBtn {
-      background-color: #dc2626;
-      color: white;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Problem - Az-Math</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <script type="module" src="../js/main.js" defer></script>
+  <script type="module" src="../js/menu.js" defer></script>
+  <script type="module" src="../js/edit-problem.js" defer></script>
 </head>
 <body>
-  <h1>Edit Problem</h1>
-  <form id="editProblemForm">
-    <div>
-      <label for="title">Title:</label><br>
-      <input type="text" id="title" required>
+  <!-- ===== Navbar ===== -->
+  <header class="navbar">
+    <div class="nav-left">
+      <button class="hamburger" id="menu-toggle">☰</button>
+      <span class="site-title">Az-Math Admin</span>
     </div>
-    <div>
-      <label for="statement">Statement:</label><br>
-      <textarea id="statement" required></textarea>
+    <div class="nav-right">
+      <img src="../assets/img/defaultprofile.png" class="profile-icon" id="profile-photo" />
     </div>
-    <div>
-      <label for="solution">Solution:</label><br>
-      <textarea id="solution"></textarea>
+  </header>
+
+  <!-- ===== Sidebar ===== -->
+  <nav class="sidebar" id="sidebar">
+    <ul>
+      <li><a href="index.html">📊 Dashboard</a></li>
+      <li><a href="problems.html" class="active">📝 Problems</a></li>
+      <li><a href="lessons.html">📚 Lessons</a></li>
+    </ul>
+  </nav>
+
+  <div id="menu"></div>
+
+  <!-- ===== Main Editor Content ===== -->
+  <main class="content editor-content">
+    <div class="editor-header">
+      <h1>Edit Problem</h1>
+      <div class="editor-actions">
+        <button id="preview-btn" class="btn btn-secondary">👁️ Preview</button>
+        <button id="save-draft-btn" class="btn btn-secondary">💾 Save as Draft</button>
+        <button id="publish-btn" class="btn">✅ Publish</button>
+        <a href="problems.html" class="btn btn-cancel">❌ Cancel</a>
+      </div>
     </div>
-    <div style="display:flex; gap:1rem;">
-      <button type="submit">Save</button>
-      <button type="button" id="deleteBtn">Delete</button>
+
+    <!-- ===== Editor Form ===== -->
+    <div id="editor-form" class="editor-form">
+      <div class="form-section">
+        <h2>Basic Information</h2>
+        
+        <label>Problem ID</label>
+        <input type="text" id="problem-id" readonly disabled />
+        
+        <label>Title (Optional)</label>
+        <input type="text" id="problem-title" placeholder="Leave empty to use 'Problem #ID'" />
+        
+        <label>Category</label>
+        <select id="problem-category">
+          <option value="">Select Category</option>
+          <option value="Algebra">Algebra</option>
+          <option value="Geometry">Geometry</option>
+          <option value="Number Theory">Number Theory</option>
+          <option value="Combinatorics">Combinatorics</option>
+        </select>
+        
+        <label>Difficulty</label>
+        <select id="problem-difficulty">
+          <option value="Easy">Easy</option>
+          <option value="Medium">Medium</option>
+          <option value="Hard">Hard</option>
+        </select>
+        
+        <label>Tags (comma-separated)</label>
+        <input type="text" id="problem-tags" placeholder="e.g. inequalities, olympiad" />
+      </div>
+
+      <!-- ===== Statement Editor ===== -->
+      <div class="form-section">
+        <h2>Problem Statement</h2>
+        <div id="statement-blocks" class="blocks-container"></div>
+        <div class="block-actions">
+          <button id="add-text-statement" class="btn btn-small">➕ Text</button>
+          <button id="add-image-statement" class="btn btn-small">🖼️ Image</button>
+          <button id="add-problem-ref-statement" class="btn btn-small">🔗 Problem Ref</button>
+          <button id="add-lesson-ref-statement" class="btn btn-small">📚 Lesson Ref</button>
+        </div>
+      </div>
+
+      <!-- ===== Solutions Editor ===== -->
+      <div class="form-section">
+        <h2>Solutions</h2>
+        <div id="solutions-container"></div>
+        <button id="add-solution-btn" class="btn">➕ Add Solution</button>
+      </div>
+
+      <!-- ===== Lesson References ===== -->
+      <div class="form-section">
+        <label>Lesson IDs (comma-separated)</label>
+        <input type="text" id="lesson-refs" placeholder="e.g. 1, 2, 3" />
+        <small>Enter the IDs of lessons where this problem is used</small>
+      </div>
     </div>
-  </form>
+
+    <!-- ===== Preview Mode ===== -->
+    <div id="preview-mode" class="preview-mode" style="display:none;">
+      <div class="problem-detail">
+        <div class="problem-detail-header">
+          <h1 id="preview-title">Problem Title</h1>
+          <div class="problem-meta">
+            <span id="preview-id" class="meta-item"></span>
+            <span id="preview-category" class="meta-item"></span>
+            <span id="preview-difficulty" class="meta-item"></span>
+          </div>
+          <div id="preview-tags" class="problem-tags"></div>
+        </div>
+
+        <div class="section">
+          <h2>Problem Statement</h2>
+          <div id="preview-statement" class="content-blocks"></div>
+        </div>
+
+        <div class="section">
+          <h2>Solutions</h2>
+          <div id="preview-solutions"></div>
+        </div>
+      </div>
+    </div>
+  </main>
 </body>
 </html>
