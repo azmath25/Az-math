@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard - Az-Math</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <script type="module" src="../js/main.js" defer></script>
+  <script type="module" src="../js/menu.js" defer></script>
+  <script type="module" src="../js/auth.js" defer></script>
+  <script type="module">
+    import { protectAdminPage } from "../js/auth.js";
+    protectAdminPage();
+  </script>
+</head>
+<body>
+  <header class="navbar">
+    <div class="nav-left">
+      <button class="hamburger" id="menu-toggle">☰</button>
+      <span class="site-title">Az-Math Admin</span>
+    </div>
+    <div class="nav-right">
+      <img src="../assets/img/defaultprofile.png" class="profile-icon" id="profile-photo">
+    </div>
+  </header>
+
+  <nav class="sidebar" id="sidebar">
+    <ul>
+      <li><a href="../index.html">🏠 Home</a></li>
+      <li><a href="../problems.html">📝 Problems (Public)</a></li>
+      <li><a href="../lessons.html">📚 Lessons (Public)</a></li>
+      <li><a href="../profile.html">👤 Profile</a></li>
+    </ul>
+  </nav>
+
+  <div id="menu"></div>
+
+  <main class="content">
+    <h1>Admin Dashboard</h1>
+    <p class="admin-welcome">Welcome to the Az-Math admin panel. Manage problems, lessons, and users.</p>
+
+    <div class="admin-dashboard-grid">
+      <!-- Problems Card -->
+      <div class="dashboard-card">
+        <div class="dashboard-icon">📝</div>
+        <h2>Problems</h2>
+        <p>Create, edit, and manage math problems</p>
+        <div class="dashboard-actions">
+          <a href="problems.html" class="btn">View All Problems</a>
+          <a href="edit-problem.html" class="btn btn-secondary">Add New Problem</a>
+        </div>
+      </div>
+
+      <!-- Lessons Card -->
+      <div class="dashboard-card">
+        <div class="dashboard-icon">📚</div>
+        <h2>Lessons</h2>
+        <p>Create, edit, and manage lessons</p>
+        <div class="dashboard-actions">
+          <a href="lessons.html" class="btn">View All Lessons</a>
+          <a href="edit-lesson.html" class="btn btn-secondary">Add New Lesson</a>
+        </div>
+      </div>
+
+      <!-- Users Card -->
+      <div class="dashboard-card">
+        <div class="dashboard-icon">👥</div>
+        <h2>Users</h2>
+        <p>Manage user accounts and permissions</p>
+        <div class="dashboard-actions">
+          <a href="users.html" class="btn">Manage Users</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="section">
+      <h2>Quick Stats</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h3 id="total-problems">-</h3>
+          <p>Total Problems</p>
+        </div>
+        <div class="stat-card">
+          <h3 id="total-lessons">-</h3>
+          <p>Total Lessons</p>
+        </div>
+        <div class="stat-card">
+          <h3 id="total-users">-</h3>
+          <p>Total Users</p>
+        </div>
+        <div class="stat-card">
+          <h3 id="draft-count">-</h3>
+          <p>Drafts</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { db } from "../js/firebase.js";
+    import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+    async function loadStats() {
+      try {
+        // Total problems
+        const problemsSnap = await getDocs(collection(db, "problems"));
+        document.getElementById("total-problems").textContent = problemsSnap.size;
+
+        // Total lessons
+        const lessonsSnap = await getDocs(collection(db, "lessons"));
+        document.getElementById("total-lessons").textContent = lessonsSnap.size;
+
+        // Total users
+        const usersSnap = await getDocs(collection(db, "Users"));
+        document.getElementById("total-users").textContent = usersSnap.size;
+
+        // Drafts (problems + lessons)
+        const draftProblemsSnap = await getDocs(query(collection(db, "problems"), where("draft", "==", true)));
+        const draftLessonsSnap = await getDocs(query(collection(db, "lessons"), where("draft", "==", true)));
+        document.getElementById("draft-count").textContent = draftProblemsSnap.size + draftLessonsSnap.size;
+      } catch (err) {
+        console.error("Error loading stats:", err);
+      }
+    }
+
+    loadStats();
+  </script>
+</body>
+</html>
