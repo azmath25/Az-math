@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Lessons - Az-Math</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <script type="module" src="../js/main.js" defer></script>
+  <script type="module" src="../js/menu.js" defer></script>
+  <script type="module" src="../js/admin-lessons.js" defer></script>
+</head>
+<body>
+  <header class="navbar">
+    <div class="nav-left">
+      <button class="hamburger" id="menu-toggle">☰</button>
+      <span class="site-title">Az-Math Admin</span>
+    </div>
+    <div class="nav-right">
+      <img src="../assets/img/defaultprofile.png" class="profile-icon" id="profile-photo">
+    </div>
+  </header>
+
+  <nav class="sidebar" id="sidebar">
+    <ul>
+      <li><a href="../index.html">🏠 Home</a></li>
+      <li><a href="index.html">📊 Dashboard</a></li>
+      <li><a href="problems.html">📝 Problems</a></li>
+      <li><a href="users.html">👥 Users</a></li>
+    </ul>
+  </nav>
+
+  <div id="menu"></div>
+
+  <main class="content">
+    <div class="admin-header">
+      <h1>Manage Lessons</h1>
+      <button id="add-lesson-btn" class="btn">➕ Add New Lesson</button>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="search-container">
+      <input type="text" id="search-input" placeholder="Search lessons..." />
+      
+      <div class="filters">
+        <select id="category-filter">
+          <option value="">All Categories</option>
+          <option value="Algebra">Algebra</option>
+          <option value="Geometry">Geometry</option>
+          <option value="Number Theory">Number Theory</option>
+          <option value="Combinatorics">Combinatorics</option>
+        </select>
+
+        <select id="draft-filter">
+          <option value="">All</option>
+          <option value="published">Published</option>
+          <option value="draft">Drafts</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Lessons Grid -->
+    <div id="lessons-list" class="card-grid"></div>
+  </main>
+</body>
+</html>
