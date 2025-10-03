@@ -5,25 +5,31 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Problems - Az-Math</title>
   <link rel="stylesheet" href="css/style.css" />
-  <!-- MathJax -->
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
-
   <script type="module" src="js/main.js" defer></script>
   <script type="module" src="js/menu.js" defer></script>
+
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$','$$']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
   <script type="module" src="js/problems.js" defer></script>
 </head>
 <body>
   <header class="navbar">
     <div class="nav-left">
-      <button class="hamburger" id="menu-toggle">☰</button>
+      <button id="menu-toggle" class="hamburger">☰</button>
       <span class="site-title">Az-Math</span>
     </div>
     <div class="nav-right">
-      <img src="assets/img/defaultprofile.png" class="profile-icon" id="profile-photo" alt="profile">
+      <img id="profile-photo" class="profile-icon" src="assets/img/defaultprofile.png" alt="profile">
     </div>
   </header>
 
-  <nav class="sidebar" id="sidebar">
+  <nav id="sidebar" class="sidebar">
     <ul>
       <li><a href="index.html">Home</a></li>
       <li><a href="problems.html">Problems</a></li>
@@ -36,16 +42,15 @@
   <main class="content">
     <h1>Problems</h1>
 
-    <div class="toolbar" style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
-      <input type="text" id="global-problem-search" placeholder="Search problems..." style="flex:1;padding:8px;border-radius:6px;border:1px solid #ccc">
+    <div class="toolbar">
+      <input id="global-problem-search" type="search" placeholder="Search problems..." />
       <button id="global-search-btn" class="btn">Search</button>
-      <button id="clear-search-btn" class="btn" style="background:#777;">Clear</button>
       <a href="admin.html" class="btn" style="background:#2563eb;">Admin</a>
     </div>
 
-    <div id="problems-list" class="card-grid" aria-live="polite"></div>
+    <div id="problems-list" class="card-grid"></div>
 
-    <div class="pagination" style="margin-top:16px;">
+    <div class="pagination">
       <button id="prev-page" class="btn">Prev</button>
       <span id="page-info">Page 1</span>
       <button id="next-page" class="btn">Next</button>
