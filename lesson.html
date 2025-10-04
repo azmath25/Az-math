@@ -5,6 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lesson - Az-Math</title>
   <link rel="stylesheet" href="css/style.css" />
+  
+  <!-- MathJax Configuration -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$']],
+        displayMath: [['$$', '$$']],
+        processEscapes: true
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+  
   <script type="module" src="js/main.js" defer></script>
   <script type="module" src="js/menu.js" defer></script>
   <script type="module" src="js/lesson.js" defer></script>
@@ -22,9 +38,10 @@
 
   <nav class="sidebar" id="sidebar">
     <ul>
-      <li><a href="index.html">Home</a></li>
-      <li><a href="problems.html">Problems</a></li>
-      <li><a href="lessons.html">Lessons</a></li>
+      <li><a href="index.html">🏠 Home</a></li>
+      <li><a href="problems.html">📝 Problems</a></li>
+      <li><a href="lessons.html">📚 Lessons</a></li>
+      <li><a href="profile.html">👤 Profile</a></li>
     </ul>
   </nav>
 
@@ -42,21 +59,32 @@
         <div id="lesson-tags" class="lesson-tags"></div>
       </div>
 
+      <!-- Cover Image -->
+      <div id="lesson-cover-container" style="display:none;">
+        <img id="lesson-cover" style="max-width:100%; border-radius: 12px; margin: 1rem 0;" />
+      </div>
+
       <!-- Lesson Content (blocks) -->
       <div class="section">
         <div id="lesson-content" class="content-blocks"></div>
       </div>
 
+      <!-- Related Problems -->
+      <div class="section" id="problems-section" style="display:none;">
+        <h2>Related Problems</h2>
+        <ul id="problem-list" class="ref-list"></ul>
+      </div>
+
       <!-- Metadata -->
       <div class="section metadata-section">
         <h3>Metadata</h3>
-        <p><strong>Author:</strong> <span id="lesson-author"></span></p>
-        <p><strong>Created:</strong> <span id="lesson-timestamp"></span></p>
+        <p><strong>Author:</strong> <span id="lesson-author">Unknown</span></p>
+        <p><strong>Created:</strong> <span id="lesson-timestamp">Unknown</span></p>
       </div>
 
       <!-- Back Button -->
       <div class="section">
-        <a href="lessons.html" class="btn">← Back to Lessons</a>
+        <a href="lessons.html" class="btn btn-secondary">← Back to Lessons</a>
       </div>
     </div>
   </main>
