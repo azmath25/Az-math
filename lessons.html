@@ -5,6 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lessons - Az-Math</title>
   <link rel="stylesheet" href="css/style.css" />
+  
+  <!-- MathJax Configuration -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$']],
+        displayMath: [['$$', '$$']],
+        processEscapes: true
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+  
   <script type="module" src="js/main.js" defer></script>
   <script type="module" src="js/menu.js" defer></script>
   <script type="module" src="js/lessons.js" defer></script>
@@ -22,15 +38,16 @@
 
   <nav class="sidebar" id="sidebar">
     <ul>
-      <li><a href="index.html">Home</a></li>
-      <li><a href="problems.html">Problems</a></li>
+      <li><a href="index.html">🏠 Home</a></li>
+      <li><a href="problems.html">📝 Problems</a></li>
+      <li><a href="profile.html">👤 Profile</a></li>
     </ul>
   </nav>
 
   <div id="menu"></div>
 
   <main class="content">
-    <h1>Lessons</h1>
+    <h1>Math Lessons</h1>
     
     <!-- Search and Filters -->
     <div class="search-container">
