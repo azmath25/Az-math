@@ -2,29 +2,50 @@
 import { onAuthState } from "./auth.js";
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Sidebar toggle
   const menuToggle = document.getElementById("menu-toggle");
   const sidebar = document.getElementById("sidebar");
+  
   if (menuToggle && sidebar) {
-    menuToggle.addEventListener("click", () => sidebar.classList.toggle("open"));
+    menuToggle.addEventListener("click", () => {
+      sidebar.classList.toggle("open");
+    });
+
+    // Close sidebar when clicking outside
+    document.addEventListener("click", (e) => {
+      if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+        sidebar.classList.remove("open");
+      }
+    });
   }
 
-  // Profile photo click / show
-  const profilePhoto = document.getElementById("profile-photo") || document.getElementById("profile-photo");
+  // Profile photo handling
+  const profilePhoto = document.getElementById("profile-photo");
   if (profilePhoto) {
-    profilePhoto.src = "assets/img/defaultprofile.png";
-  }
+    // Determine base path
+    const isAdminPage = window.location.pathname.includes("/admin/");
+    const basePath = isAdminPage ? "../" : "";
 
-  // show admin link if admin
-  onAuthState((user) => {
-    if (!user) return;
-    const menu = document.getElementById("menu");
-    if (!menu) return;
-    if (user.role === "admin") {
-      const a = document.createElement("a");
-      a.href = "admin/index.html";
-      a.textContent = "Admin";
-      a.className = "admin-shortcut";
-      menu.appendChild(a);
-    }
-  });
+    // Set default photo
+    profilePhoto.src = `${basePath}assets/img/defaultprofile.png`;
+
+    // Make clickable to go to profile
+    profilePhoto.style.cursor = "pointer";
+    profilePhoto.addEventListener("click", () => {
+      onAuthState((user) => {
+        if (user) {
+          window.location.href = `${basePath}profile.html`;
+        } else {
+          window.location.href = `${basePath}login.html`;
+        }
+      });
+    });
+
+    // Load user's photo if they have one
+    onAuthState((user) => {
+      if (user && user.photoURL) {
+        profilePhoto.src = user.photoURL;
+      }
+    });
+  }
 });
