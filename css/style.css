@@ -1457,3 +1457,220 @@ form textarea {
 .image-url-input {
   margin-bottom: 0 !important;
 }
+/* Add these styles to your css/style.css */
+
+/* ===== Interactive Problem Preview Card ===== */
+.problem-preview-card.interactive-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border: 2px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 2rem;
+  margin: 2rem 0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.problem-preview-card.interactive-card:hover {
+  border-color: #667eea;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+  transform: translateY(-2px);
+}
+
+.problem-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.problem-card-meta {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.problem-id-badge {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #667eea;
+  background: linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%);
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+}
+
+.problem-category-badge {
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.toggle-solution-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.toggle-solution-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.toggle-solution-btn:active {
+  transform: translateY(0);
+}
+
+.problem-preview-card h4 {
+  margin: 0.75rem 0;
+  color: #2d3748;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.problem-statement-preview {
+  background: #f9fafb;
+  border-left: 4px solid #667eea;
+  padding: 1.25rem;
+  margin: 1.25rem 0;
+  border-radius: 8px;
+  line-height: 1.8;
+}
+
+.problem-statement-preview p {
+  margin: 0.75rem 0;
+  color: #4a5568;
+}
+
+.problem-statement-preview p:first-child {
+  margin-top: 0;
+}
+
+.problem-statement-preview p:last-child {
+  margin-bottom: 0;
+}
+
+.problem-solutions-container {
+  margin: 1.5rem 0;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 12px;
+  border: 2px solid #bfdbfe;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.problem-solutions-container .solution-block {
+  background: #fff;
+  border: 1px solid #e0f2fe;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.problem-solutions-container .solution-block:last-child {
+  margin-bottom: 0;
+}
+
+.problem-solutions-container .solution-block h3 {
+  margin-top: 0;
+  color: #0369a1;
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.problem-solutions-container .solution-block p {
+  margin: 0.75rem 0;
+  line-height: 1.8;
+  color: #4a5568;
+}
+
+.problem-card-footer {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 2px solid #e5e7eb;
+  text-align: right;
+}
+
+.view-full-link {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.view-full-link:hover {
+  color: #5568d3;
+  text-decoration: underline;
+}
+
+.ref-list {
+  list-style: none;
+  padding: 0;
+}
+
+.ref-list li {
+  padding: 0.75rem;
+  margin: 0.5rem 0;
+  background: #f9fafb;
+  border-radius: 8px;
+  border-left: 3px solid #667eea;
+}
+
+/* ===== Responsive Adjustments ===== */
+@media (max-width: 768px) {
+  .problem-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .toggle-solution-btn {
+    width: 100%;
+  }
+  
+  .problem-preview-card.interactive-card {
+    padding: 1.5rem;
+  }
+  
+  .problem-card-footer {
+    text-align: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .problem-card-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+  }
+  
+  .problem-preview-card h4 {
+    font-size: 1.1rem;
+  }
+}
