@@ -5,12 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Edit Problem - Az-Math</title>
   <link rel="stylesheet" href="../css/style.css" />
+  
+  <!-- MathJax for Preview Only -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$']],
+        displayMath: [['$$', '$$']],
+        processEscapes: true
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+  
   <script type="module" src="../js/main.js" defer></script>
   <script type="module" src="../js/menu.js" defer></script>
   <script type="module" src="../js/edit-problem.js" defer></script>
+  <script type="module">
+    import { protectAdminPage } from "../js/auth.js";
+    protectAdminPage().catch(() => {
+      // Redirect handled in protectAdminPage
+    });
+  </script>
 </head>
 <body>
-  <!-- ===== Navbar ===== -->
   <header class="navbar">
     <div class="nav-left">
       <button class="hamburger" id="menu-toggle">☰</button>
@@ -21,18 +42,16 @@
     </div>
   </header>
 
-  <!-- ===== Sidebar ===== -->
   <nav class="sidebar" id="sidebar">
     <ul>
       <li><a href="index.html">📊 Dashboard</a></li>
-      <li><a href="problems.html" class="active">📝 Problems</a></li>
+      <li><a href="problems.html">📝 Problems</a></li>
       <li><a href="lessons.html">📚 Lessons</a></li>
     </ul>
   </nav>
 
   <div id="menu"></div>
 
-  <!-- ===== Main Editor Content ===== -->
   <main class="content editor-content">
     <div class="editor-header">
       <h1>Edit Problem</h1>
@@ -44,7 +63,7 @@
       </div>
     </div>
 
-    <!-- ===== Editor Form ===== -->
+    <!-- Editor Form -->
     <div id="editor-form" class="editor-form">
       <div class="form-section">
         <h2>Basic Information</h2>
@@ -75,7 +94,7 @@
         <input type="text" id="problem-tags" placeholder="e.g. inequalities, olympiad" />
       </div>
 
-      <!-- ===== Statement Editor ===== -->
+      <!-- Statement Editor -->
       <div class="form-section">
         <h2>Problem Statement</h2>
         <div id="statement-blocks" class="blocks-container"></div>
@@ -87,14 +106,14 @@
         </div>
       </div>
 
-      <!-- ===== Solutions Editor ===== -->
+      <!-- Solutions Editor -->
       <div class="form-section">
         <h2>Solutions</h2>
         <div id="solutions-container"></div>
         <button id="add-solution-btn" class="btn">➕ Add Solution</button>
       </div>
 
-      <!-- ===== Lesson References ===== -->
+      <!-- Lesson References -->
       <div class="form-section">
         <label>Lesson IDs (comma-separated)</label>
         <input type="text" id="lesson-refs" placeholder="e.g. 1, 2, 3" />
@@ -102,7 +121,7 @@
       </div>
     </div>
 
-    <!-- ===== Preview Mode ===== -->
+    <!-- Preview Mode -->
     <div id="preview-mode" class="preview-mode" style="display:none;">
       <div class="problem-detail">
         <div class="problem-detail-header">
