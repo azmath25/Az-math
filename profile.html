@@ -10,7 +10,6 @@
   <script type="module" src="js/profile.js" defer></script>
 </head>
 <body>
-  <!-- Top Navbar -->
   <header class="navbar">
     <div class="nav-left">
       <button class="hamburger" id="menu-toggle">☰</button>
@@ -21,19 +20,16 @@
     </div>
   </header>
 
-  <!-- Sidebar -->
   <nav class="sidebar" id="sidebar">
     <ul>
-      <li><a href="index.html">Home</a></li>
-      <li><a href="problems.html">Problems</a></li>
-      <li><a href="lessons.html">Lessons</a></li>
+      <li><a href="index.html">🏠 Home</a></li>
+      <li><a href="problems.html">📝 Problems</a></li>
+      <li><a href="lessons.html">📚 Lessons</a></li>
     </ul>
   </nav>
 
-  <!-- Dynamic Menu -->
   <div id="menu"></div>
 
-  <!-- Main Content -->
   <main class="content">
     <h1>My Profile</h1>
 
@@ -44,14 +40,32 @@
       <div class="profile-info">
         <p><strong>Email:</strong> <span id="user-email">Loading...</span></p>
         <p><strong>Role:</strong> <span id="user-role">Loading...</span></p>
+        <p id="pending-message" style="display:none; color: #f59e0b; margin-top: 1rem;">
+          ⏳ Your account is pending admin approval.
+        </p>
       </div>
     </div>
 
     <!-- Admin Section -->
-    <div id="admin-section" style="display:none; margin-top:20px;">
+    <div id="admin-section" style="display:none; margin-top:2rem;">
       <div class="card">
-        <h2>Admin Controls</h2>
-        <button class="btn" onclick="location.href='admin.html'">Go to Admin Page</button>
+        <h2>⚙️ Admin Controls</h2>
+        <p>You have administrator privileges.</p>
+        <div style="margin-top: 1rem;">
+          <a href="admin/index.html" class="btn">Go to Admin Dashboard</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Guest Message -->
+    <div id="guest-section" style="display:none;">
+      <div class="card">
+        <h2>Welcome to Az-Math!</h2>
+        <p>Please login or register to access your profile.</p>
+        <div style="margin-top: 1rem; display: flex; gap: 1rem;">
+          <a href="login.html" class="btn">Login</a>
+          <a href="register.html" class="btn btn-secondary">Register</a>
+        </div>
       </div>
     </div>
   </main>
