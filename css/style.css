@@ -1404,3 +1404,21 @@ form textarea {
 .rounded-xl {
   border-radius: 16px;
 }
+.image-upload-section {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  gap: 0.5rem;
+}
+
+.image-preview {
+  margin-top: 1rem;
+  text-align: center;
+  padding: 1rem;
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  border-radius: 12px;
+}
+
+.image-preview img {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
