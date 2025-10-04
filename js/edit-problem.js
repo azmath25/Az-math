@@ -4,198 +4,383 @@ import {
   doc,
   getDoc,
   setDoc,
-  updateDoc,
   serverTimestamp
 } from "../js/firebase.js";
 
+let solutionCounter = 0;
+
+// Create block element for editing
 function createBlockElement(block = { type: "text", content: "" }) {
   const wrapper = document.createElement("div");
-  wrapper.className = "block-item";
+  wrapper.className = "block-editor";
+  
   if (block.type === "text") {
-    wrapper.innerHTML = `<textarea class="block-text-input" placeholder="Text block">${escapeHtml(block.content || "")}</textarea>
-      <button class="remove-block btn-small">Remove</button>`;
+    wrapper.innerHTML = `
+      <div class="block-header">
+        <span>📝 Text Block</span>
+        <div class="block-controls">
+          <button class="btn-icon move-up" title="Move Up">↑</button>
+          <button class="btn-icon move-down" title="Move Down">↓</button>
+          <button class="btn-icon remove-block" title="Remove">✕</button>
+        </div>
+      </div>
+      <textarea class="block-textarea" placeholder="Enter text (supports $math$ and $$display math$$)">${escapeHtml(block.content || "")}</textarea>
+    `;
   } else if (block.type === "image") {
-    wrapper.innerHTML = `<input class="block-image-input" placeholder="Image URL" value="${escapeHtml(block.url || "")}">
-      <button class="remove-block btn-small">Remove</button>`;
+    wrapper.innerHTML = `
+      <div class="block-header">
+        <span>🖼️ Image Block</span>
+        <div class="block-controls">
+          <button class="btn-icon move-up" title="Move Up">↑</button>
+          <button class="btn-icon move-down" title="Move Down">↓</button>
+          <button class="btn-icon remove-block" title="Remove">✕</button>
+        </div>
+      </div>
+      <input class="block-input" placeholder="Image URL (https://...)" value="${escapeHtml(block.url || "")}">
+    `;
   } else if (block.type === "problem") {
-    wrapper.innerHTML = `<input class="block-problem-input" placeholder="Problem ID" value="${escapeHtml(block.problemId || "")}">
-      <button class="remove-block btn-small">Remove</button>`;
+    wrapper.innerHTML = `
+      <div class="block-header">
+        <span>🔗 Problem Reference</span>
+        <div class="block-controls">
+          <button class="btn-icon move-up" title="Move Up">↑</button>
+          <button class="btn-icon move-down" title="Move Down">↓</button>
+          <button class="btn-icon remove-block" title="Remove">✕</button>
+        </div>
+      </div>
+      <input class="block-input" placeholder="Problem ID" value="${escapeHtml(block.problemId || "")}">
+    `;
   } else if (block.type === "lesson") {
-    wrapper.innerHTML = `<input class="block-lesson-input" placeholder="Lesson ID" value="${escapeHtml(block.lessonId || "")}">
-      <button class="remove-block btn-small">Remove</button>`;
+    wrapper.innerHTML = `
+      <div class="block-header">
+        <span>📚 Lesson Reference</span>
+        <div class="block-controls">
+          <button class="btn-icon move-up" title="Move Up">↑</button>
+          <button class="btn-icon move-down" title="Move Down">↓</button>
+          <button class="btn-icon remove-block" title="Remove">✕</button>
+        </div>
+      </div>
+      <input class="block-input" placeholder="Lesson ID" value="${escapeHtml(block.lessonId || "")}">
+    `;
   }
-  wrapper.querySelectorAll(".remove-block").forEach(b => b.addEventListener("click", () => wrapper.remove()));
+  
+  // Attach event listeners
+  wrapper.querySelector(".remove-block").addEventListener("click", () => wrapper.remove());
+  wrapper.querySelector(".move-up").addEventListener("click", () => moveBlock(wrapper, -1));
+  wrapper.querySelector(".move-down").addEventListener("click", () => moveBlock(wrapper, 1));
+  
   return wrapper;
 }
 
-function escapeHtml(s = "") {
-  return String(s).replace(/[&<>"']/g, (m) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+// Move block up or down
+function moveBlock(blockElement, direction) {
+  const container = blockElement.parentElement;
+  const blocks = Array.from(container.children);
+  const index = blocks.indexOf(blockElement);
+  const newIndex = index + direction;
+  
+  if (newIndex < 0 || newIndex >= blocks.length) return;
+  
+  if (direction === -1) {
+    container.insertBefore(blockElement, blocks[newIndex]);
+  } else {
+    container.insertBefore(blocks[newIndex], blockElement);
+  }
 }
 
-function renderSolutionUI(sol) {
+// Gather blocks from container
+function gatherBlocksFromContainer(container) {
+  const blocks = [];
+  
+  container.querySelectorAll(".block-editor").forEach(blockEl => {
+    const textarea = blockEl.querySelector(".block-textarea");
+    const input = blockEl.querySelector(".block-input");
+    
+    if (textarea) {
+      blocks.push({ type: "text", content: textarea.value });
+    } else if (input) {
+      const header = blockEl.querySelector(".block-header span").textContent;
+      if (header.includes("Image")) {
+        blocks.push({ type: "image", url: input.value });
+      } else if (header.includes("Problem")) {
+        blocks.push({ type: "problem", problemId: input.value });
+      } else if (header.includes("Lesson")) {
+        blocks.push({ type: "lesson", lessonId: input.value });
+      }
+    }
+  });
+  
+  return blocks;
+}
+
+// Render solution editor
+function renderSolutionUI(solution) {
   const container = document.createElement("div");
   container.className = "solution-editor";
-  container.innerHTML = `<div class="solution-header"><strong>Solution ${sol.id}</strong> <button class="remove-solution btn-small">Remove Solution</button></div>`;
+  container.dataset.solutionId = solution.id;
+  
+  container.innerHTML = `
+    <div class="solution-header">
+      <h3>Solution ${solution.id}</h3>
+      <button class="btn btn-small btn-delete remove-solution">Remove Solution</button>
+    </div>
+  `;
+  
   const blocksContainer = document.createElement("div");
   blocksContainer.className = "blocks-container";
-  (sol.blocks || []).forEach(b => blocksContainer.appendChild(createBlockElement(b)));
+  
+  (solution.blocks || []).forEach(block => {
+    blocksContainer.appendChild(createBlockElement(block));
+  });
+  
   const actions = document.createElement("div");
   actions.className = "block-actions";
   actions.innerHTML = `
     <button class="btn btn-small add-text">➕ Text</button>
     <button class="btn btn-small add-image">🖼️ Image</button>
     <button class="btn btn-small add-problem">🔗 Problem Ref</button>
+    <button class="btn btn-small add-lesson">📚 Lesson Ref</button>
   `;
+  
   container.appendChild(blocksContainer);
   container.appendChild(actions);
-
-  actions.querySelector(".add-text").addEventListener("click", () => blocksContainer.appendChild(createBlockElement({ type: "text", content: "" })));
-  actions.querySelector(".add-image").addEventListener("click", () => blocksContainer.appendChild(createBlockElement({ type: "image", url: "" })));
-  actions.querySelector(".add-problem").addEventListener("click", () => blocksContainer.appendChild(createBlockElement({ type: "problem", problemId: "" })));
-
-  container.querySelector(".remove-solution").addEventListener("click", () => container.remove());
+  
+  // Attach event listeners
+  actions.querySelector(".add-text").addEventListener("click", () => {
+    blocksContainer.appendChild(createBlockElement({ type: "text", content: "" }));
+  });
+  actions.querySelector(".add-image").addEventListener("click", () => {
+    blocksContainer.appendChild(createBlockElement({ type: "image", url: "" }));
+  });
+  actions.querySelector(".add-problem").addEventListener("click", () => {
+    blocksContainer.appendChild(createBlockElement({ type: "problem", problemId: "" }));
+  });
+  actions.querySelector(".add-lesson").addEventListener("click", () => {
+    blocksContainer.appendChild(createBlockElement({ type: "lesson", lessonId: "" }));
+  });
+  
+  container.querySelector(".remove-solution").addEventListener("click", () => {
+    if (confirm("Remove this solution?")) {
+      container.remove();
+    }
+  });
+  
   return container;
 }
 
-function gatherBlocksFromContainer(container) {
-  const out = [];
-  container.querySelectorAll(".block-item").forEach(item => {
-    if (item.querySelector(".block-text-input")) {
-      out.push({ type: "text", content: item.querySelector(".block-text-input").value });
-    } else if (item.querySelector(".block-image-input")) {
-      out.push({ type: "image", url: item.querySelector(".block-image-input").value });
-    } else if (item.querySelector(".block-problem-input")) {
-      out.push({ type: "problem", problemId: item.querySelector(".block-problem-input").value });
-    } else if (item.querySelector(".block-lesson-input")) {
-      out.push({ type: "lesson", lessonId: item.querySelector(".block-lesson-input").value });
-    }
-  });
-  return out;
+// Escape HTML
+function escapeHtml(text) {
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
 }
 
+// Render block for preview (with MathJax)
+function renderBlockPreview(block) {
+  if (!block) return "";
+  
+  switch (block.type) {
+    case "text":
+      return `<div class="block-text">${escapeHtml(block.content || "")}</div>`;
+    case "image":
+      return `<div class="block-image"><img src="${escapeHtml(block.url || "")}" style="max-width:100%; border-radius: 8px; margin: 1rem 0;" /></div>`;
+    case "problem":
+      return `<div class="ref-block"><strong>📝 Related Problem:</strong> <a href="../problem.html?id=${escapeHtml(block.problemId || "")}" class="ref-link">Problem #${escapeHtml(block.problemId || "")}</a></div>`;
+    case "lesson":
+      return `<div class="ref-block"><strong>📚 Related Lesson:</strong> <a href="../lesson.html?id=${escapeHtml(block.lessonId || "")}" class="ref-link">Lesson #${escapeHtml(block.lessonId || "")}</a></div>`;
+    default:
+      return "";
+  }
+}
+
+// Initialize editor
 document.addEventListener("DOMContentLoaded", async () => {
-  const params = new URLSearchParams(location.search);
-  const id = params.get("id");
+  const params = new URLSearchParams(window.location.search);
+  const problemId = params.get("id");
+  
   const problemIdInput = document.getElementById("problem-id");
   const titleInput = document.getElementById("problem-title");
   const categoryInput = document.getElementById("problem-category");
   const difficultyInput = document.getElementById("problem-difficulty");
   const tagsInput = document.getElementById("problem-tags");
   const statementBlocks = document.getElementById("statement-blocks");
-  const addText = document.getElementById("add-text-statement");
-  const addImage = document.getElementById("add-image-statement");
-  const addProblemRef = document.getElementById("add-problem-ref-statement");
-  const addLessonRef = document.getElementById("add-lesson-ref-statement");
   const solutionsContainer = document.getElementById("solutions-container");
+  const lessonRefsInput = document.getElementById("lesson-refs");
+  
+  const addTextBtn = document.getElementById("add-text-statement");
+  const addImageBtn = document.getElementById("add-image-statement");
+  const addProblemRefBtn = document.getElementById("add-problem-ref-statement");
+  const addLessonRefBtn = document.getElementById("add-lesson-ref-statement");
   const addSolutionBtn = document.getElementById("add-solution-btn");
   const saveDraftBtn = document.getElementById("save-draft-btn");
   const publishBtn = document.getElementById("publish-btn");
   const previewBtn = document.getElementById("preview-btn");
-
-  // helpers
-  addText.addEventListener("click", () => statementBlocks.appendChild(createBlockElement({ type: "text", content: "" })));
-  addImage.addEventListener("click", () => statementBlocks.appendChild(createBlockElement({ type: "image", url: "" })));
-  addProblemRef.addEventListener("click", () => statementBlocks.appendChild(createBlockElement({ type: "problem", problemId: "" })));
-  addLessonRef.addEventListener("click", () => statementBlocks.appendChild(createBlockElement({ type: "lesson", lessonId: "" })));
-
-  addSolutionBtn.addEventListener("click", () => {
-    const nextId = solutionsContainer.children.length + 1;
-    solutionsContainer.appendChild(renderSolutionUI({ id: nextId, blocks: [] }));
+  
+  // Add block handlers for statement
+  addTextBtn.addEventListener("click", () => {
+    statementBlocks.appendChild(createBlockElement({ type: "text", content: "" }));
   });
-
-  // Load existing problem if id provided
-  if (id) {
-    problemIdInput.value = id;
-    const snap = await getDoc(doc(db, "problems", String(id)));
-    if (snap.exists()) {
-      const p = snap.data();
-      titleInput.value = p.title || "";
-      categoryInput.value = p.category || "";
-      difficultyInput.value = p.difficulty || "Easy";
-      tagsInput.value = (p.tags || []).join(", ");
-      statementBlocks.innerHTML = "";
-      (p.statement || []).forEach(b => statementBlocks.appendChild(createBlockElement(b)));
-      // solutions
-      solutionsContainer.innerHTML = "";
-      (p.solutions || []).forEach(s => solutionsContainer.appendChild(renderSolutionUI(s)));
-      document.getElementById("lesson-refs").value = (p.lessons || []).join(", ");
-    } else {
-      // new empty
-      statementBlocks.innerHTML = "";
-      solutionsContainer.innerHTML = "";
+  addImageBtn.addEventListener("click", () => {
+    statementBlocks.appendChild(createBlockElement({ type: "image", url: "" }));
+  });
+  addProblemRefBtn.addEventListener("click", () => {
+    statementBlocks.appendChild(createBlockElement({ type: "problem", problemId: "" }));
+  });
+  addLessonRefBtn.addEventListener("click", () => {
+    statementBlocks.appendChild(createBlockElement({ type: "lesson", lessonId: "" }));
+  });
+  
+  // Add solution handler
+  addSolutionBtn.addEventListener("click", () => {
+    solutionCounter++;
+    solutionsContainer.appendChild(renderSolutionUI({ id: solutionCounter, blocks: [] }));
+  });
+  
+  // Load existing problem if ID provided
+  if (problemId) {
+    problemIdInput.value = problemId;
+    
+    try {
+      const problemDoc = await getDoc(doc(db, "problems", String(problemId)));
+      
+      if (problemDoc.exists()) {
+        const data = problemDoc.data();
+        
+        titleInput.value = data.title || "";
+        categoryInput.value = data.category || "";
+        difficultyInput.value = data.difficulty || "Medium";
+        tagsInput.value = (data.tags || []).join(", ");
+        lessonRefsInput.value = (data.lessons || []).join(", ");
+        
+        // Load statement blocks
+        statementBlocks.innerHTML = "";
+        (data.statement || []).forEach(block => {
+          statementBlocks.appendChild(createBlockElement(block));
+        });
+        
+        // Load solutions
+        solutionsContainer.innerHTML = "";
+        (data.solutions || []).forEach(solution => {
+          if (solution.id > solutionCounter) solutionCounter = solution.id;
+          solutionsContainer.appendChild(renderSolutionUI(solution));
+        });
+      }
+    } catch (err) {
+      console.error("Error loading problem:", err);
+      alert("Error loading problem: " + err.message);
     }
   }
-
-  // preview
-  previewBtn.addEventListener("click", () => {
-    const previewMode = document.getElementById("preview-mode");
-    const previewTitle = document.getElementById("preview-title");
-    const previewId = document.getElementById("preview-id");
-    const previewCategory = document.getElementById("preview-category");
-    const previewTags = document.getElementById("preview-tags");
-    const previewStatement = document.getElementById("preview-statement");
-    const previewSolutions = document.getElementById("preview-solutions");
-
-    previewTitle.textContent = titleInput.value || `Problem #${problemIdInput.value}`;
-    previewId.textContent = `#${problemIdInput.value}`;
-    previewCategory.textContent = categoryInput.value;
-    previewTags.innerHTML = "";
-    tagsInput.value.split(",").map(t => t.trim()).filter(Boolean).forEach(t => previewTags.insertAdjacentHTML("beforeend", `<span class="tag">${t}</span>`));
-    previewStatement.innerHTML = "";
-    gatherBlocksFromContainer(statementBlocks).forEach(b => {
-      if (b.type === "text") previewStatement.insertAdjacentHTML("beforeend", `<div class="block-text">${escapeHtml(b.content)}</div>`);
-      if (b.type === "image") previewStatement.insertAdjacentHTML("beforeend", `<div class="block-image"><img src="${escapeHtml(b.url)}" style="max-width:100%"/></div>`);
-    });
-    previewSolutions.innerHTML = "";
-    Array.from(solutionsContainer.children).forEach((solEl, idx) => {
-      const blocksContainer = solEl.querySelector(".blocks-container");
-      const solBlocks = gatherBlocksFromContainer(blocksContainer);
-      const solWrap = document.createElement("div");
-      solWrap.innerHTML = `<h4>Solution ${idx + 1}</h4>`;
-      solBlocks.forEach(b => {
-        if (b.type === "text") solWrap.insertAdjacentHTML("beforeend", `<div class="block-text">${escapeHtml(b.content)}</div>`);
-        if (b.type === "image") solWrap.insertAdjacentHTML("beforeend", `<div class="block-image"><img src="${escapeHtml(b.url)}" style="max-width:100%"/></div>`);
-      });
-      previewSolutions.appendChild(solWrap);
-    });
-    document.getElementById("editor-form").style.display = "none";
-    previewMode.style.display = "block";
-  });
-
-  // save helper
+  
+  // Save problem
   async function saveProblem(publish = false) {
-    const pid = problemIdInput.value || null;
-    if (!pid) return alert("Problem ID missing");
-    const docRef = doc(db, "problems", String(pid));
+    const pid = problemIdInput.value;
+    if (!pid) {
+      alert("Problem ID is required");
+      return;
+    }
+    
+    // Gather solutions
+    const solutions = [];
+    solutionsContainer.querySelectorAll(".solution-editor").forEach((solEl, index) => {
+      const solId = parseInt(solEl.dataset.solutionId) || (index + 1);
+      const blocksContainer = solEl.querySelector(".blocks-container");
+      solutions.push({
+        id: solId,
+        blocks: gatherBlocksFromContainer(blocksContainer)
+      });
+    });
+    
     const payload = {
-      id: Number(pid),
-      title: titleInput.value || null,
-      category: categoryInput.value || "",
-      difficulty: difficultyInput.value || "",
+      id: parseInt(pid),
+      title: titleInput.value.trim() || null,
+      category: categoryInput.value,
+      difficulty: difficultyInput.value,
       tags: tagsInput.value.split(",").map(t => t.trim()).filter(Boolean),
-      draft: !publish,
       statement: gatherBlocksFromContainer(statementBlocks),
-      solutions: Array.from(solutionsContainer.children).map((solEl, idx) => {
-        const blocksContainer = solEl.querySelector(".blocks-container");
-        return {
-          id: idx + 1,
-          blocks: gatherBlocksFromContainer(blocksContainer)
-        };
-      }),
-      lessons: (document.getElementById("lesson-refs").value || "").split(",").map(x => x.trim()).filter(Boolean).map(x => Number(x)),
+      solutions: solutions,
+      lessons: lessonRefsInput.value.split(",").map(x => x.trim()).filter(Boolean).map(x => parseInt(x)),
+      draft: !publish,
       author: "admin",
       timestamp: serverTimestamp()
     };
+    
     try {
-      await setDoc(docRef, payload, { merge: true });
-      alert(publish ? "Published" : "Saved as draft");
-      if (publish) location.href = "problems.html";
+      await setDoc(doc(db, "problems", String(pid)), payload, { merge: true });
+      alert(publish ? "Problem published successfully!" : "Draft saved successfully!");
+      
+      if (publish) {
+        window.location.href = "problems.html";
+      }
     } catch (err) {
-      console.error(err);
-      alert("Save failed: " + err.message);
+      console.error("Error saving problem:", err);
+      alert("Failed to save: " + err.message);
     }
   }
-
-  saveDraftBtn.addEventListener("click", async () => saveProblem(false));
-  publishBtn.addEventListener("click", async () => saveProblem(true));
+  
+  saveDraftBtn.addEventListener("click", () => saveProblem(false));
+  publishBtn.addEventListener("click", () => saveProblem(true));
+  
+  // Preview
+  previewBtn.addEventListener("click", () => {
+    const editorForm = document.getElementById("editor-form");
+    const previewMode = document.getElementById("preview-mode");
+    
+    // Toggle visibility
+    editorForm.style.display = "none";
+    previewMode.style.display = "block";
+    previewBtn.textContent = "✏️ Edit";
+    
+    // Check if already in preview mode
+    if (previewMode.style.display === "block" && previewBtn.textContent === "✏️ Edit") {
+      editorForm.style.display = "block";
+      previewMode.style.display = "none";
+      previewBtn.textContent = "👁️ Preview";
+      return;
+    }
+    
+    // Render preview
+    const title = titleInput.value || `Problem #${problemIdInput.value}`;
+    document.getElementById("preview-title").textContent = title;
+    document.getElementById("preview-id").textContent = `#${problemIdInput.value}`;
+    document.getElementById("preview-category").textContent = categoryInput.value || "General";
+    document.getElementById("preview-difficulty").textContent = difficultyInput.value;
+    
+    // Tags
+    const previewTags = document.getElementById("preview-tags");
+    previewTags.innerHTML = "";
+    tagsInput.value.split(",").map(t => t.trim()).filter(Boolean).forEach(tag => {
+      previewTags.insertAdjacentHTML("beforeend", `<span class="tag">${escapeHtml(tag)}</span>`);
+    });
+    
+    // Statement
+    const previewStatement = document.getElementById("preview-statement");
+    previewStatement.innerHTML = "";
+    gatherBlocksFromContainer(statementBlocks).forEach(block => {
+      previewStatement.insertAdjacentHTML("beforeend", renderBlockPreview(block));
+    });
+    
+    // Solutions
+    const previewSolutions = document.getElementById("preview-solutions");
+    previewSolutions.innerHTML = "";
+    
+    solutionsContainer.querySelectorAll(".solution-editor").forEach((solEl, index) => {
+      const solDiv = document.createElement("div");
+      solDiv.className = "solution-block";
+      solDiv.innerHTML = `<h3>Solution ${index + 1}</h3>`;
+      
+      const blocksContainer = solEl.querySelector(".blocks-container");
+      gatherBlocksFromContainer(blocksContainer).forEach(block => {
+        solDiv.insertAdjacentHTML("beforeend", renderBlockPreview(block));
+      });
+      
+      previewSolutions.appendChild(solDiv);
+    });
+    
+    // Typeset MathJax
+    if (window.MathJax && window.MathJax.typesetPromise) {
+      window.MathJax.typesetPromise([previewMode]).catch(err => {
+        console.error("MathJax error:", err);
+      });
+    }
+  });
 });
