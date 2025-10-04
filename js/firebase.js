@@ -26,6 +26,12 @@ import {
   createUserWithEmailAndPassword,
   signOut
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
 
 // Your Firebase configuration
 const firebaseConfig = {
@@ -41,11 +47,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
+const storage = getStorage(app);
 
 // Export everything for use in other modules
 export {
   db,
   auth,
+  storage,
   collection,
   doc,
   getDoc,
@@ -64,12 +72,8 @@ export {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signOut
+  signOut,
+  ref,
+  uploadBytes,
+  getDownloadURL
 };
-// Add to your firebase.js
-import { getStorage } from "firebase/storage";
-
-export const storage = getStorage(app);
-
-// Also export these for uploads:
-export { ref, uploadBytes, getDownloadURL } from "firebase/storage";
