@@ -66,3 +66,10 @@ export {
   createUserWithEmailAndPassword,
   signOut
 };
+// Add to your firebase.js
+import { getStorage } from "firebase/storage";
+
+export const storage = getStorage(app);
+
+// Also export these for uploads:
+export { ref, uploadBytes, getDownloadURL } from "firebase/storage";
