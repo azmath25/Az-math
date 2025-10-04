@@ -7,10 +7,47 @@
   <link rel="stylesheet" href="../css/style.css" />
   <script type="module" src="../js/main.js" defer></script>
   <script type="module" src="../js/menu.js" defer></script>
-  <script type="module" src="../js/auth.js" defer></script>
   <script type="module">
     import { protectAdminPage } from "../js/auth.js";
-    protectAdminPage();
+    import { db, collection, getDocs, query, where } from "../js/firebase.js";
+    
+    // Protect this page
+    protectAdminPage().catch(() => {
+      // Redirect handled in protectAdminPage
+    });
+    
+    // Load statistics
+    async function loadStats() {
+      try {
+        // Total problems
+        const problemsSnap = await getDocs(collection(db, "problems"));
+        document.getElementById("total-problems").textContent = problemsSnap.size;
+
+        // Total lessons
+        const lessonsSnap = await getDocs(collection(db, "lessons"));
+        document.getElementById("total-lessons").textContent = lessonsSnap.size;
+
+        // Total users
+        const usersSnap = await getDocs(collection(db, "Users"));
+        document.getElementById("total-users").textContent = usersSnap.size;
+
+        // Drafts (problems + lessons)
+        const draftProblemsSnap = await getDocs(
+          query(collection(db, "problems"), where("draft", "==", true))
+        );
+        const draftLessonsSnap = await getDocs(
+          query(collection(db, "lessons"), where("draft", "==", true))
+        );
+        document.getElementById("draft-count").textContent = 
+          draftProblemsSnap.size + draftLessonsSnap.size;
+      } catch (err) {
+        console.error("Error loading stats:", err);
+      }
+    }
+    
+    document.addEventListener("DOMContentLoaded", () => {
+      loadStats();
+    });
   </script>
 </head>
 <body>
@@ -96,35 +133,5 @@
       </div>
     </div>
   </main>
-
-  <script type="module">
-    import { db } from "../js/firebase.js";
-    import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
-
-    async function loadStats() {
-      try {
-        // Total problems
-        const problemsSnap = await getDocs(collection(db, "problems"));
-        document.getElementById("total-problems").textContent = problemsSnap.size;
-
-        // Total lessons
-        const lessonsSnap = await getDocs(collection(db, "lessons"));
-        document.getElementById("total-lessons").textContent = lessonsSnap.size;
-
-        // Total users
-        const usersSnap = await getDocs(collection(db, "Users"));
-        document.getElementById("total-users").textContent = usersSnap.size;
-
-        // Drafts (problems + lessons)
-        const draftProblemsSnap = await getDocs(query(collection(db, "problems"), where("draft", "==", true)));
-        const draftLessonsSnap = await getDocs(query(collection(db, "lessons"), where("draft", "==", true)));
-        document.getElementById("draft-count").textContent = draftProblemsSnap.size + draftLessonsSnap.size;
-      } catch (err) {
-        console.error("Error loading stats:", err);
-      }
-    }
-
-    loadStats();
-  </script>
 </body>
 </html>
