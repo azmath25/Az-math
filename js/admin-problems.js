@@ -8,78 +8,229 @@ import {
   doc,
   getDoc,
   setDoc,
+  deleteDoc,
   serverTimestamp
 } from "../js/firebase.js";
 
+let allProblems = [];
+let filteredProblems = [];
+
+const problemsList = document.getElementById("problems-list");
+const searchInput = document.getElementById("search-input");
+const categoryFilter = document.getElementById("category-filter");
+const difficultyFilter = document.getElementById("difficulty-filter");
+const draftFilter = document.getElementById("draft-filter");
+const addProblemBtn = document.getElementById("add-problem-btn");
+
+// Load all problems (including drafts)
 async function loadProblems() {
-  const list = document.getElementById("problems-list");
-  list.innerHTML = "Loading...";
-  const q = query(collection(db, "problems"), orderBy("id"));
-  const snap = await getDocs(q);
-  list.innerHTML = "";
-  if (snap.empty) {
-    list.innerHTML = "<p>No problems</p>";
+  try {
+    problemsList.innerHTML = "<p>Loading problems...</p>";
+    
+    const q = query(collection(db, "problems"), orderBy("id", "desc"));
+    const snapshot = await getDocs(q);
+    
+    allProblems = [];
+    snapshot.forEach(doc => {
+      allProblems.push({ docId: doc.id, ...doc.data() });
+    });
+    
+    filteredProblems = [...allProblems];
+    renderProblems();
+  } catch (err) {
+    console.error("Error loading problems:", err);
+    problemsList.innerHTML = "<p>Error loading problems. Please try again.</p>";
+  }
+}
+
+// Render problems
+function renderProblems() {
+  if (filteredProblems.length === 0) {
+    problemsList.innerHTML = "<p>No problems found matching your criteria.</p>";
     return;
   }
-  snap.forEach(d => {
-    const p = d.data();
-    const el = document.createElement("div");
-    el.className = "problem-row";
-    el.innerHTML = `
-      <div>
-        <strong>${p.title || "Problem " + p.id}</strong>
-        <div>${p.category || ""} · ${p.difficulty || ""}</div>
-      </div>
-      <div class="actions">
-        <a class="btn" href="edit-problem.html?id=${p.id}">Edit</a>
-        <button class="btn btn-danger" data-id="${p.id}" data-action="delete">Delete</button>
-      </div>
-    `;
-    list.appendChild(el);
-  });
 
-  // wire delete buttons
-  document.querySelectorAll('button[data-action="delete"]').forEach(b => {
-    b.addEventListener("click", async (e) => {
-      const id = e.currentTarget.dataset.id;
-      if (!confirm("Delete problem " + id + "?")) return;
-      await deleteProblem(id);
-      loadProblems();
-    });
+  problemsList.innerHTML = "";
+  
+  filteredProblems.forEach(problem => {
+    const card = createProblemCard(problem);
+    problemsList.appendChild(card);
   });
 }
 
-async function deleteProblem(id) {
+// Create problem card
+function createProblemCard(problem) {
+  const card = document.createElement("div");
+  card.className = `problem-card-wide ${problem.draft ? 'draft-card' : ''}`;
+  
+  const title = problem.title || `Problem #${problem.id}`;
+  const statementPreview = getStatementPreview(problem.statement);
+  
+  card.innerHTML = `
+    <div class="problem-header">
+      <span class="problem-id">#${problem.id}</span>
+      <span class="problem-category">${problem.category || "General"}</span>
+      <span class="problem-difficulty difficulty-${(problem.difficulty || "medium").toLowerCase()}">${problem.difficulty || "Medium"}</span>
+      ${problem.draft ? '<span class="draft-badge">DRAFT</span>' : ''}
+    </div>
+    
+    ${title !== `Problem #${problem.id}` ? `<h3 style="margin: 0.5rem 0;">${escapeHtml(title)}</h3>` : ""}
+    
+    ${problem.tags && problem.tags.length > 0 ? `
+      <div class="problem-tags">
+        ${problem.tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}
+      </div>
+    ` : ""}
+    
+    <div class="problem-body">
+      ${statementPreview}
+    </div>
+    
+    <div class="problem-footer">
+      <a href="../problem.html?id=${problem.id}" class="btn btn-small btn-secondary" target="_blank">👁️ View</a>
+      <a href="edit-problem.html?id=${problem.id}" class="btn btn-small btn-edit">✏️ Edit</a>
+      <button class="btn btn-small btn-delete" data-id="${problem.id}">🗑️ Delete</button>
+    </div>
+  `;
+  
+  // Attach delete handler
+  const deleteBtn = card.querySelector('.btn-delete');
+  deleteBtn.addEventListener('click', () => deleteProblem(problem.id));
+  
+  return card;
+}
+
+// Get statement preview
+function getStatementPreview(statement = []) {
+  if (!statement || statement.length === 0) {
+    return "<p><em>No statement available</em></p>";
+  }
+  
+  const firstTextBlock = statement.find(block => block.type === "text");
+  
+  if (firstTextBlock) {
+    const content = firstTextBlock.content || "";
+    const truncated = content.length > 200 ? content.substring(0, 200) + "..." : content;
+    return `<p>${escapeHtml(truncated)}</p>`;
+  }
+  
+  return "<p><em>View problem for details</em></p>";
+}
+
+// Delete problem
+async function deleteProblem(problemId) {
+  if (!confirm(`Are you sure you want to delete Problem #${problemId}? This action cannot be undone.`)) {
+    return;
+  }
+  
   try {
-    await deleteDoc(doc(db, "problems", String(id)));
-    alert("Deleted " + id);
+    await deleteDoc(doc(db, "problems", String(problemId)));
+    alert(`Problem #${problemId} deleted successfully.`);
+    loadProblems();
   } catch (err) {
-    console.error(err);
-    alert("Delete failed");
+    console.error("Error deleting problem:", err);
+    alert("Failed to delete problem: " + err.message);
   }
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
-  document.getElementById("add-problem-btn").addEventListener("click", async () => {
-    // get latest id from meta/problems
-    const metaDoc = await getDoc(doc(db, "meta", "problems"));
+// Apply filters
+function applyFilters() {
+  const searchTerm = searchInput.value.toLowerCase().trim();
+  const categoryValue = categoryFilter.value;
+  const difficultyValue = difficultyFilter.value;
+  const draftValue = draftFilter.value;
+  
+  filteredProblems = allProblems.filter(problem => {
+    // Search filter
+    if (searchTerm) {
+      const titleMatch = (problem.title || "").toLowerCase().includes(searchTerm);
+      const idMatch = String(problem.id).includes(searchTerm);
+      const tagsMatch = (problem.tags || []).some(tag => 
+        tag.toLowerCase().includes(searchTerm)
+      );
+      
+      if (!titleMatch && !idMatch && !tagsMatch) {
+        return false;
+      }
+    }
+    
+    // Category filter
+    if (categoryValue && problem.category !== categoryValue) {
+      return false;
+    }
+    
+    // Difficulty filter
+    if (difficultyValue && problem.difficulty !== difficultyValue) {
+      return false;
+    }
+    
+    // Draft filter
+    if (draftValue === "published" && problem.draft) {
+      return false;
+    }
+    if (draftValue === "draft" && !problem.draft) {
+      return false;
+    }
+    
+    return true;
+  });
+  
+  renderProblems();
+}
+
+// Create new problem
+async function createNewProblem() {
+  try {
+    // Get latest ID from meta/problems
+    const metaDocRef = doc(db, "meta", "problems");
+    const metaDoc = await getDoc(metaDocRef);
+    
     let nextId = 1;
-    if (metaDoc.exists()) nextId = (metaDoc.data().latestId || 0) + 1;
-    // create draft problem
+    if (metaDoc.exists() && metaDoc.data().latestId) {
+      nextId = metaDoc.data().latestId + 1;
+    }
+    
+    // Create draft problem
     await setDoc(doc(db, "problems", String(nextId)), {
       id: nextId,
-      draft: true,
+      title: "",
       category: "",
-      difficulty: "Easy",
+      difficulty: "Medium",
       tags: [],
       statement: [],
       solutions: [],
       lessons: [],
+      draft: true,
+      author: "admin",
       timestamp: serverTimestamp()
     });
-    // update meta
-    await setDoc(doc(db, "meta", "problems"), { latestId: nextId }, { merge: true });
-    location.href = `edit-problem.html?id=${nextId}`;
-  });
-  await loadProblems();
+    
+    // Update meta
+    await setDoc(metaDocRef, { latestId: nextId }, { merge: true });
+    
+    // Redirect to edit page
+    window.location.href = `edit-problem.html?id=${nextId}`;
+  } catch (err) {
+    console.error("Error creating problem:", err);
+    alert("Failed to create problem: " + err.message);
+  }
+}
+
+// Escape HTML
+function escapeHtml(text) {
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Event listeners
+document.addEventListener("DOMContentLoaded", () => {
+  loadProblems();
+  
+  searchInput.addEventListener("input", applyFilters);
+  categoryFilter.addEventListener("change", applyFilters);
+  difficultyFilter.addEventListener("change", applyFilters);
+  draftFilter.addEventListener("change", applyFilters);
+  
+  addProblemBtn.addEventListener("click", createNewProblem);
 });
