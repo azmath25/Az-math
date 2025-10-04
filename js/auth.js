@@ -11,11 +11,13 @@ import {
   setDoc
 } from "./firebase.js";
 
-// Register user -> create firebase auth user and create doc in Users collection (pending)
+// Register user → create Firebase auth user and Firestore doc (pending role)
 export async function register(email, password) {
   try {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     const uid = cred.user.uid;
+    
+    // Create user document in Firestore
     await setDoc(doc(db, "Users", uid), {
       email,
       role: "pending",
@@ -23,11 +25,12 @@ export async function register(email, password) {
       approved: false,
       createdAt: Date.now()
     });
-    alert("Registered. Waiting for admin approval.");
+    
+    alert("Registration successful! Waiting for admin approval.");
     location.href = "login.html";
   } catch (err) {
-    console.error(err);
-    alert("Register failed: " + err.message);
+    console.error("Registration error:", err);
+    alert("Registration failed: " + err.message);
   }
 }
 
@@ -35,40 +38,120 @@ export async function register(email, password) {
 export async function login(email, password) {
   try {
     await signInWithEmailAndPassword(auth, email, password);
-    // onAuthStateChanged will handle redirect / UI
+    
+    // Check if approved
+    const user = auth.currentUser;
+    if (user) {
+      const userDoc = await getDoc(doc(db, "Users", user.uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        if (userData.role === "pending" || !userData.approved) {
+          alert("Your account is pending admin approval.");
+          await signOut(auth);
+          return;
+        }
+      }
+    }
+    
     location.href = "profile.html";
   } catch (err) {
-    console.error(err);
+    console.error("Login error:", err);
     alert("Login failed: " + err.message);
   }
 }
 
+// Logout
 export async function logout() {
-  await signOut(auth);
-  location.href = "index.html";
+  try {
+    await signOut(auth);
+    location.href = "index.html";
+  } catch (err) {
+    console.error("Logout error:", err);
+    alert("Logout failed: " + err.message);
+  }
 }
 
-// Check admin role; redirect if not admin
-export async function protectAdminPage() {
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-      location.href = "../login.html";
-      return;
-    }
-    const udoc = await getDoc(doc(db, "Users", user.uid));
-    const data = udoc.exists() ? udoc.data() : null;
-    if (!data || data.role !== "admin") {
-      alert("Admin access required.");
-      location.href = "../index.html";
-    }
+// Protect admin pages - check auth and admin role
+export function protectAdminPage() {
+  return new Promise((resolve, reject) => {
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        alert("Please login to access admin panel.");
+        location.href = "../login.html";
+        reject("Not authenticated");
+        return;
+      }
+      
+      try {
+        const userDoc = await getDoc(doc(db, "Users", user.uid));
+        if (!userDoc.exists()) {
+          alert("User profile not found.");
+          location.href = "../index.html";
+          reject("No profile");
+          return;
+        }
+        
+        const userData = userDoc.data();
+        if (userData.role !== "admin") {
+          alert("Admin access required.");
+          location.href = "../index.html";
+          reject("Not admin");
+          return;
+        }
+        
+        resolve(userData);
+      } catch (err) {
+        console.error("Auth check error:", err);
+        alert("Authentication error.");
+        location.href = "../index.html";
+        reject(err);
+      }
+    });
   });
 }
 
-// Helper: get current user profile doc (or null)
-export function onAuthState(cb) {
+// Get current user with profile data (promise-based)
+export function getCurrentUser() {
+  return new Promise((resolve) => {
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        resolve(null);
+        return;
+      }
+      
+      try {
+        const userDoc = await getDoc(doc(db, "Users", user.uid));
+        if (userDoc.exists()) {
+          resolve({ uid: user.uid, email: user.email, ...userDoc.data() });
+        } else {
+          resolve({ uid: user.uid, email: user.email, role: "pending" });
+        }
+      } catch (err) {
+        console.error("Error fetching user data:", err);
+        resolve({ uid: user.uid, email: user.email, role: "pending" });
+      }
+    });
+  });
+}
+
+// Helper: listen to auth state changes with callback
+export function onAuthState(callback) {
   onAuthStateChanged(auth, async (user) => {
-    if (!user) return cb(null);
-    const udoc = await getDoc(doc(db, "Users", user.uid));
-    cb(udoc.exists() ? { uid: user.uid, ...udoc.data() } : null);
+    if (!user) {
+      callback(null);
+      return;
+    }
+    
+    try {
+      const userDoc = await getDoc(doc(db, "Users", user.uid));
+      if (userDoc.exists()) {
+        callback({ uid: user.uid, email: user.email, ...userDoc.data() });
+      } else {
+        callback({ uid: user.uid, email: user.email, role: "pending" });
+      }
+    } catch (err) {
+      console.error("Error in onAuthState:", err);
+      callback({ uid: user.uid, email: user.email, role: "pending" });
+    }
   });
 }
