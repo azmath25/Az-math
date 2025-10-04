@@ -5,9 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Edit Lesson - Az-Math</title>
   <link rel="stylesheet" href="../css/style.css" />
+  
+  <!-- MathJax for Preview Only -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$']],
+        displayMath: [['$$', '$$']],
+        processEscapes: true
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+  
   <script type="module" src="../js/main.js" defer></script>
   <script type="module" src="../js/menu.js" defer></script>
   <script type="module" src="../js/edit-lesson.js" defer></script>
+  <script type="module">
+    import { protectAdminPage } from "../js/auth.js";
+    protectAdminPage().catch(() => {
+      // Redirect handled in protectAdminPage
+    });
+  </script>
 </head>
 <body>
   <header class="navbar">
@@ -97,6 +119,10 @@
             <span id="preview-category" class="meta-item"></span>
           </div>
           <div id="preview-tags" class="lesson-tags"></div>
+        </div>
+
+        <div id="preview-cover-container" style="display:none;">
+          <img id="preview-cover" style="max-width:100%; border-radius: 12px; margin: 1rem 0;" />
         </div>
 
         <div class="section">
