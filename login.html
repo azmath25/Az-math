@@ -9,13 +9,32 @@
   <script type="module" src="js/menu.js" defer></script>
   <script type="module">
     import { login } from "./js/auth.js";
+    
     document.addEventListener("DOMContentLoaded", () => {
       const form = document.getElementById("login-form");
-      form.addEventListener("submit", (e) => {
+      const submitBtn = document.getElementById("submit-btn");
+      
+      form.addEventListener("submit", async (e) => {
         e.preventDefault();
-        const email = document.getElementById("login-email").value;
+        
+        const email = document.getElementById("login-email").value.trim();
         const password = document.getElementById("login-password").value;
-        login(email, password);
+        
+        if (!email || !password) {
+          alert("Please fill in all fields.");
+          return;
+        }
+        
+        // Disable button during login
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Logging in...";
+        
+        try {
+          await login(email, password);
+        } catch (err) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Login";
+        }
       });
     });
   </script>
@@ -33,25 +52,42 @@
 
   <nav class="sidebar" id="sidebar">
     <ul>
-      <li><a href="index.html">Home</a></li>
-      <li><a href="problems.html">Problems</a></li>
-      <li><a href="lessons.html">Lessons</a></li>
+      <li><a href="index.html">🏠 Home</a></li>
+      <li><a href="problems.html">📝 Problems</a></li>
+      <li><a href="lessons.html">📚 Lessons</a></li>
+      <li><a href="register.html">✍️ Register</a></li>
     </ul>
   </nav>
 
   <div id="menu"></div>
 
   <main class="form-container">
-    <h1>Login</h1>
+    <h1>Login to Az-Math</h1>
     <form id="login-form">
-      <label>Email</label>
-      <input type="email" id="login-email" required />
-      <label>Password</label>
-      <input type="password" id="login-password" required />
-      <button type="submit" class="btn">Login</button>
+      <label for="login-email">Email</label>
+      <input 
+        type="email" 
+        id="login-email" 
+        placeholder="your@email.com"
+        required 
+        autocomplete="email"
+      />
+      
+      <label for="login-password">Password</label>
+      <input 
+        type="password" 
+        id="login-password" 
+        placeholder="Enter your password"
+        required 
+        autocomplete="current-password"
+        minlength="6"
+      />
+      
+      <button type="submit" id="submit-btn" class="btn">Login</button>
     </form>
-    <p style="margin-top:1rem;">
-      Don’t have an account? <a href="register.html">Register here</a>
+    
+    <p style="margin-top:1.5rem; text-align: center;">
+      Don't have an account? <a href="register.html" style="color: #2563eb; font-weight: 500;">Register here</a>
     </p>
   </main>
 </body>
