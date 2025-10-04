@@ -1,5 +1,5 @@
 // js/firebase.js
-// --- Replace firebaseConfig with your project's config ---
+// Firebase v9 modular SDK configuration
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import {
   getFirestore,
@@ -27,20 +27,22 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
+// Your Firebase configuration
 const firebaseConfig = {
-  // <-- PASTE YOUR FIREBASE CONFIG HERE -->
-  // apiKey: "xxx",
-  // authDomain: "xxx.firebaseapp.com",
-  // projectId: "your-project-id",
-  // storageBucket: "...",
-  // messagingSenderId: "...",
-  // appId: "..."
+  apiKey: "AIzaSyCYrw8aLDGtbKXdou7YweLVBKLFXHyl9SM",
+  authDomain: "az-math.firebaseapp.com",
+  projectId: "az-math",
+  storageBucket: "az-math.firebasestorage.app",
+  messagingSenderId: "49046309945",
+  appId: "1:49046309945:web:a3be9525705860c75191e8"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+// Export everything for use in other modules
 export {
   db,
   auth,
